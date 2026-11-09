@@ -1,0 +1,347 @@
+{
+ "survey": "National Compensation Survey, Employee Benefits in the United States, March 2026",
+ "reference": "March 2026",
+ "published": "2026-09-25",
+ "retrieved_at": "2026-11-07",
+ "source_api": "BLS Public Data API v2 (POST to api.bls.gov/publicAPI/v2/timeseries/data/), documented at https://www.bls.gov/developers/",
+ "raw_file": "data-raw/bls-api-2026-11-07.json",
+ "note": "Percent of workers with access to the plan; long-term care at plan and occupation level. Private industry for industries, sizes, regions, union, hours and wages.",
+ "groups": [
+  {
+   "kind": "all",
+   "label": "All civilian workers",
+   "std": 42.0,
+   "ltd": 38.0,
+   "ltc": 17.0
+  },
+  {
+   "kind": "all",
+   "label": "Private industry",
+   "std": 44.0,
+   "ltd": 37.0,
+   "ltc": 15.0
+  },
+  {
+   "kind": "all",
+   "label": "State and local government",
+   "std": 26.0,
+   "ltd": 41.0,
+   "ltc": 29.0
+  },
+  {
+   "kind": "industry",
+   "label": "Construction",
+   "std": 32.0,
+   "ltd": 21.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Manufacturing",
+   "std": 59.0,
+   "ltd": 49.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Retail trade",
+   "std": 36.0,
+   "ltd": 15.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Transportation and warehousing",
+   "std": 50.0,
+   "ltd": 35.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Information",
+   "std": 82.0,
+   "ltd": 81.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Banking and credit",
+   "std": 75.0,
+   "ltd": 90.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Insurance carriers",
+   "std": 83.0,
+   "ltd": 69.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Real estate and rental",
+   "std": 38.0,
+   "ltd": 39.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Professional, scientific and technical services",
+   "std": 55.0,
+   "ltd": 57.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Administrative and support services",
+   "std": 34.0,
+   "ltd": 25.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Educational services",
+   "std": 39.0,
+   "ltd": 53.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Health care and social assistance",
+   "std": 43.0,
+   "ltd": 44.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Hospitals",
+   "std": 62.0,
+   "ltd": 67.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Accommodation and food services",
+   "std": 22.0,
+   "ltd": 7.0,
+   "ltc": null
+  },
+  {
+   "kind": "industry",
+   "label": "Other services",
+   "std": 24.0,
+   "ltd": 19.0,
+   "ltc": null
+  },
+  {
+   "kind": "size",
+   "label": "Fewer than 50 workers",
+   "std": 30.0,
+   "ltd": 22.0,
+   "ltc": null
+  },
+  {
+   "kind": "size",
+   "label": "50 to 99 workers",
+   "std": 37.0,
+   "ltd": 30.0,
+   "ltc": null
+  },
+  {
+   "kind": "size",
+   "label": "100 to 499 workers",
+   "std": 52.0,
+   "ltd": 42.0,
+   "ltc": null
+  },
+  {
+   "kind": "size",
+   "label": "500 workers or more",
+   "std": 68.0,
+   "ltd": 66.0,
+   "ltc": 33.0
+  },
+  {
+   "kind": "region",
+   "label": "New England",
+   "std": 46.0,
+   "ltd": 47.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "Middle Atlantic",
+   "std": 81.0,
+   "ltd": 41.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "South Atlantic",
+   "std": 39.0,
+   "ltd": 34.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "East South Central",
+   "std": 37.0,
+   "ltd": 30.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "West South Central",
+   "std": 37.0,
+   "ltd": 34.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "East North Central",
+   "std": 42.0,
+   "ltd": 39.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "West North Central",
+   "std": 41.0,
+   "ltd": 42.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "Mountain",
+   "std": 35.0,
+   "ltd": 30.0,
+   "ltc": null
+  },
+  {
+   "kind": "region",
+   "label": "Pacific",
+   "std": 34.0,
+   "ltd": 39.0,
+   "ltc": null
+  },
+  {
+   "kind": "union",
+   "label": "Union workers",
+   "std": 71.0,
+   "ltd": 48.0,
+   "ltc": 20.0
+  },
+  {
+   "kind": "union",
+   "label": "Nonunion workers",
+   "std": 42.0,
+   "ltd": 36.0,
+   "ltc": 14.0
+  },
+  {
+   "kind": "hours",
+   "label": "Full-time workers",
+   "std": 52.0,
+   "ltd": 47.0,
+   "ltc": 17.0
+  },
+  {
+   "kind": "hours",
+   "label": "Part-time workers",
+   "std": 19.0,
+   "ltd": 5.0,
+   "ltc": 7.0
+  },
+  {
+   "kind": "wage",
+   "label": "Lowest-paid quarter of private workers",
+   "std": 21.0,
+   "ltd": 10.0,
+   "ltc": 6.0
+  },
+  {
+   "kind": "wage",
+   "label": "Highest-paid quarter of private workers",
+   "std": 66.0,
+   "ltd": 67.0,
+   "ltc": 27.0
+  }
+ ],
+ "provisions": {
+  "civilian": {
+   "std_employee_pays_none": 90.0,
+   "std_employee_pays": 10.0,
+   "std_fixed_pct_share": 74.0,
+   "std_median_pct": 60.0,
+   "std_max_weekly_p10": 170.0,
+   "std_max_weekly_p25": null,
+   "std_max_weekly_p50": 1000.0,
+   "std_max_weekly_p75": 1500.0,
+   "std_max_weekly_p90": 2500.0,
+   "std_weeks_p10": 12.0,
+   "std_weeks_p25": 13.0,
+   "std_weeks_p50": 26.0,
+   "std_weeks_p75": 26.0,
+   "std_weeks_p90": 26.0,
+   "ltd_employee_pays_none": 94.0,
+   "ltd_employee_pays": 6.0,
+   "ltd_fixed_pct_share": 96.0,
+   "ltd_median_pct": 60.0,
+   "ltd_max_monthly_p10": 3900.0,
+   "ltd_max_monthly_p25": 5000.0,
+   "ltd_max_monthly_p50": 10000.0,
+   "ltd_max_monthly_p75": 12500.0,
+   "ltd_max_monthly_p90": 15000.0
+  },
+  "private": {
+   "std_employee_pays_none": 90.0,
+   "std_employee_pays": 10.0,
+   "std_fixed_pct_share": 73.0,
+   "std_median_pct": 60.0,
+   "std_max_weekly_p10": 170.0,
+   "std_max_weekly_p25": 450.0,
+   "std_max_weekly_p50": 1030.0,
+   "std_max_weekly_p75": 1500.0,
+   "std_max_weekly_p90": 2500.0,
+   "std_weeks_p10": 12.0,
+   "std_weeks_p25": 13.0,
+   "std_weeks_p50": 26.0,
+   "std_weeks_p75": 26.0,
+   "std_weeks_p90": 26.0,
+   "ltd_employee_pays_none": 96.0,
+   "ltd_employee_pays": 4.0,
+   "ltd_fixed_pct_share": 96.0,
+   "ltd_median_pct": 60.0,
+   "ltd_max_monthly_p10": 4000.0,
+   "ltd_max_monthly_p25": 6000.0,
+   "ltd_max_monthly_p50": 10000.0,
+   "ltd_max_monthly_p75": 15000.0,
+   "ltd_max_monthly_p90": 15000.0
+  },
+  "government": {
+   "std_employee_pays_none": 93.0,
+   "std_employee_pays": 7.0,
+   "std_fixed_pct_share": 87.0,
+   "std_median_pct": 60.0,
+   "std_max_weekly_p10": null,
+   "std_max_weekly_p25": null,
+   "std_max_weekly_p50": 690.0,
+   "std_max_weekly_p75": null,
+   "std_max_weekly_p90": null,
+   "std_weeks_p10": null,
+   "std_weeks_p25": null,
+   "std_weeks_p50": 26.0,
+   "std_weeks_p75": null,
+   "std_weeks_p90": null,
+   "ltd_employee_pays_none": 83.0,
+   "ltd_employee_pays": 17.0,
+   "ltd_fixed_pct_share": 97.0,
+   "ltd_median_pct": 60.0,
+   "ltd_max_monthly_p10": null,
+   "ltd_max_monthly_p25": null,
+   "ltd_max_monthly_p50": 5000.0,
+   "ltd_max_monthly_p75": null,
+   "ltd_max_monthly_p90": null
+  }
+ }
+}

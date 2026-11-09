@@ -1,0 +1,39 @@
+import { definePage } from '../../lib/page-types';
+import { KIT as K } from '../../lib/kit';
+
+const a = K.hybrid({ death: 200000, pctMonth: 0.04, months: 36, careCost: 6000 });
+const b = K.hybrid({ death: 200000, pctMonth: 0.02, months: 36, careCost: 6000 });
+const big = K.hybrid({ death: 500000, pctMonth: 0.04, months: 12, careCost: 8000 });
+
+export default definePage({
+  id: 'hybrid-long-term-care-insurance', group: 'care', order: 204, slug: 'hybrid-long-term-care-insurance',
+  nav: 'Hybrid life and long-term care', card: 'How a life policy pays its death benefit out as care: monthly benefit, months it lasts, what is left for heirs, and the per diem tax limit.',
+  title: 'Hybrid Long-Term Care Insurance 2026: Monthly Care Benefit',
+  description: 'Hybrid long-term care insurance in 2026: the monthly care benefit a life policy pays from its death benefit, how long it lasts, what heirs keep and the tax.',
+  h1: 'Hybrid life and long-term care insurance: how the death benefit pays for care',
+  intro: 'Enter the death benefit, the share of it the contract pays each month for care, the months of care to test and your monthly care costs. The calculator shows the benefit and what is left.',
+  resume: `A hybrid, or linked-benefit, policy is life insurance or an annuity with a long-term care benefit attached: if the insured needs long-term care, the contract pays part of the death benefit each month while the care lasts, and whatever is not used goes to the beneficiaries. The monthly share is a contract term, often expressed as a percentage of the death benefit. A ${K.usd(200000)} death benefit paid out at 4% a month gives ${K.usd(a.monthly)} a month for care and is used up after ${K.num(a.exhaust)} months; at 2% a month it gives ${K.usd(b.monthly)} and lasts ${K.num(b.exhaust)} months. Extension riders can continue payments after the death benefit is gone. Tax follows the long-term care rules: benefits paid periodically are tax-free up to ${K.usd(K.LTC.perDiem2026)} a day in 2026, about ${K.usd(a.perDiemMonth)} a month, or actual costs if higher, combined with any other long-term care benefits for the same person.`,
+  faqs: [
+    { q: 'How does a hybrid life and long-term care policy pay?', a: `It advances the death benefit as care benefits, a fixed share each month while the insured qualifies, until the death benefit is used up or care ends. What remains is paid at death. With ${K.usd(200000)} at 4% a month, ${K.usd(a.monthly)} is paid each month and nothing remains after ${K.num(a.exhaust)} months; after 36 months of care with an extension rider, payments may continue.` },
+    { q: 'Are hybrid long-term care benefits taxable?', a: `Generally not, within limits. Accelerated death benefits paid because the insured is chronically ill are treated like long-term care benefits: periodic payments are tax-free up to the per diem limit, ${K.usd(K.LTC.perDiem2026)} a day in 2026, or actual care costs if higher. A ${K.usd(500000)} policy paying 4% a month, ${K.usd(big.monthly)}, can exceed that limit when monthly costs are ${K.usd(8000)}.` },
+    { q: 'Is a hybrid policy premium tax deductible?', a: 'Only the part that pays for a qualified long-term care benefit, and only within the age limits of the year, as a medical expense or a self-employed deduction. The life insurance part of the premium is not deductible. Insurers state in the contract or the annual statement which part of the premium is allocated to the long-term care benefit.' },
+    { q: 'What happens to a hybrid policy if care is never needed?', a: 'The beneficiaries receive the death benefit, generally free of federal income tax as life insurance proceeds. Some contracts also allow a return of premium on surrender, subject to their terms. That is the main difference from a traditional long-term care policy, which pays nothing if care is never needed and whose premiums can rise.' },
+  ],
+  body: (h) => `
+<h2>One contract, two benefits</h2>
+<p>A hybrid policy combines a life insurance death benefit with a long-term care benefit. Some are universal or whole life policies with a long-term care rider; others are built as long-term care contracts with a death benefit; annuity-based versions also exist. The common mechanism: when the insured needs care under the contract's benefit triggers, the insurer pays a share of the death benefit each month, typically a stated percentage such as 2% or 4%, which is how long the money lasts. Each payment reduces the death benefit. If care ends or the insured dies, the remaining death benefit goes to the beneficiaries.</p>
+<p>The benefit triggers follow the tax code's definition of a chronically ill individual, the same as for long-term care insurance: certification by a licensed health care practitioner that the insured cannot perform at least two activities of daily living without substantial assistance for at least 90 days, or needs substantial supervision for protection (${h.src('irs_p502', 'IRS Publication 502')}).</p>
+${h.mini('hybrid', { t: 'Your death benefit as care', p: ['db', 'pm'] })}
+<h2>Reading the result</h2>
+<p>The calculator shows three figures. The monthly benefit is the death benefit times the monthly percentage, ${K.usd(a.monthly)} for ${K.usd(200000)} at 4%. The number of months is what it takes to use the whole death benefit at that rate, ${K.num(a.exhaust)} in this case. The death benefit left is what remains after the months of care you enter. If the contract has an extension of benefits rider, payments continue after the death benefit is used up, for a period or an amount written in the rider; enter only what the contract states, since the calculator does not assume one.</p>
+<h2>Tax on the benefits</h2>
+<p>Life insurance proceeds paid at death are generally not income (${h.src('usc_101', 'section 101 of the Internal Revenue Code')}). Accelerated death benefits paid because the insured is chronically ill are treated as paid by reason of death, within the same limit as per diem long-term care benefits: the larger of ${K.usd(K.LTC.perDiem2026)} a day in 2026 and the actual cost of qualified care, minus reimbursements, for all such payments to the same insured (${h.src('irs_p525', 'IRS Publication 525')}, ${h.src('irs_rp_2025_32', 'Revenue Procedure 2025-32')}). At ${K.usd(a.monthly)} a month with care costs of ${K.usd(6000)}, the payment ${a.taxableMonth > 0 ? `exceeds the limit by about ${K.usd(a.taxableMonth)} a month` : 'stays within the limit'}. The insurer reports the payments, and ${h.src('irs_f8853', 'Form 8853')} figures the exclusion.</p>
+<h2>Hybrid or traditional</h2>
+<p>A traditional long-term care policy buys more care per dollar of premium if care is needed, but pays nothing otherwise, and its premium can rise for a whole class of policyholders. A hybrid costs more for the same care benefit, but someone always receives the money, and premiums are often fixed or paid in a single sum. The ${h.a('long-term-care-insurance-cost', 'cost page')} measures a traditional quote the same way. For tax on the premium, only the part allocated to a qualified long-term care benefit can count toward the age limits on the ${h.a('long-term-care-insurance-tax-deduction', 'deduction page')}.</p>
+<h2>Questions for the contract</h2>
+<p>What is the monthly percentage, and is it the same for home care and facility care? Is there an extension of benefits rider, and for how long? Are benefits paid as a reimbursement of costs or as a fixed amount? Is there an elimination period? Does the policy have a return of premium, and how does it change with time? The answers decide the figures to enter.</p>
+`,
+  tool: 'hybrid',
+  related: ['long-term-care-insurance-cost', 'long-term-care-insurance-benefits-taxable', 'long-term-care-insurance-tax-deduction', 'accidental-death-and-dismemberment-insurance'],
+  sources: ['irs_p525', 'usc_101', 'irs_rp_2025_32', 'irs_f8853', 'irs_p502'],
+});

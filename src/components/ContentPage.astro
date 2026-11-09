@@ -1,0 +1,38 @@
+---
+/** Every content page: H1, one-line answer, the calculator at once, the folded answer, the body, FAQ, sources. */
+import PageLayout from '../layouts/PageLayout.astro';
+import Clamp from './Clamp.astro';
+import Tool from './Tool.astro';
+import Body from './Body.astro';
+import { route, ROUTES } from '../i18n/routes';
+import { label, GROUPS } from '../i18n/nav';
+import { t } from '../i18n/ui';
+import { pageById } from '../lib/pages';
+import { helpers, SOURCES } from '../lib/helpers';
+import { KIT as K } from '../lib/kit';
+import { articleSchema, faqSchema, breadcrumbSchema, webPageSchema, webApplicationSchema } from '../lib/seo';
+import { AUTHOR_NAME } from '../data/site-config';
+import type { PageDef } from '../lib/page-types';
+interface Props { page: PageDef }
+const { page } = Astro.props;
+const lang = 'en';
+const ui = t(lang);
+const path = route(page.id, lang);
+const group = GROUPS.find((g) => g.id === page.group)!;
+const jsonLd = [webApplicationSchema({ name: page.h1, description: page.description, path, lang }), articleSchema({ title: page.h1, description: page.description, path, lang }), webPageSchema({ name: page.h1, description: page.description, path, lang }), breadcrumbSchema([{ name: ui.breadcrumbHome, path: route('home', lang) }, { name: page.nav, path }])];
+if (page.faqs.length) jsonLd.push(faqSchema(page.faqs, lang));
+const related = page.related.filter((id) => ROUTES.some((r) => r.id === id)).map((id) => ({ href: route(id, lang), name: label(id), description: pageById(id)?.card ?? '' }));
+const sources = page.sources.map((k) => ({ name: SOURCES[k].label, url: SOURCES[k].url }));
+---
+<PageLayout title={page.title} description={page.description} lang={lang} jsonLd={jsonLd} faqs={page.faqs} related={related} sources={sources} breadcrumbs={[{ label: group.label }, { label: page.nav }]}>
+  <article>
+    <header class="mb-4">
+      <h1 class="font-serif text-[1.75rem] font-bold text-navy-900 max-sm:leading-tight sm:text-3xl md:text-4xl">{page.h1}</h1>
+      <p class="mt-2 text-base text-navy-700 sm:text-lg">{page.intro}</p>
+    </header>
+    <div data-outil data-chrome class="mb-4"><Tool kind={page.tool} arg={page.toolArg} idPrefix={`p${page.order}`} /></div>
+    <p class="mb-6 text-sm text-navy-600">{ui.reviewedBy} <a href={route('about', lang)} class="underline hover:text-navy-900">{AUTHOR_NAME}</a> · <a href={route('method', lang)} class="underline hover:text-navy-900">{label('method')}</a> · IRS rules and BLS plan data read {K.day(K.RETRIEVED)}</p>
+    <Clamp text={page.resume} lang={lang} id={`clamp-${page.id}`} class="mb-8" />
+    <Body html={page.body(helpers())} path={path} />
+  </article>
+</PageLayout>

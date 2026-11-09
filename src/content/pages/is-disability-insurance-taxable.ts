@@ -1,0 +1,46 @@
+import { definePage } from '../../lib/page-types';
+import { KIT as K } from '../../lib/kit';
+
+const BEN = 3000, YEAR = BEN * 12;
+const fedEmp = K.taxAdded(YEAR, 0, 'single');
+const ficaEmp = K.sickPayFica(BEN, 1, 6, 'employer');
+const split = K.share('split', 0.3);
+const fedSplit = K.taxAdded(YEAR * split, 0, 'single');
+const mixed = K.taxAdded(YEAR, 30000, 'single');
+const ssWithLtd = K.ssTaxable(1500 * 12, YEAR, 'single');
+
+export default definePage({
+  id: 'is-disability-insurance-taxable', group: 'disability', order: 103, slug: 'is-disability-insurance-taxable',
+  nav: 'Is disability insurance taxable?', card: 'Taxable or tax-free: the IRS rule for employer-paid, pre-tax, after-tax and shared premiums, with the tax on your benefit.',
+  title: 'Disability Benefits Tax 2026: Taxable or Tax-Free by Payer',
+  description: 'Disability benefits tax in 2026: employer-paid and pre-tax premiums make the benefit taxable, after-tax premiums make it tax-free. See the tax on your check.',
+  h1: 'Is disability insurance taxable? It depends on who paid the premium',
+  intro: 'Enter the monthly benefit, the months paid this year and the way the premium was paid. The federal tax on the benefit, and the same benefit under each other arrangement, appear at once.',
+  resume: `Disability benefits are taxable income when your employer paid the premium, and also when you paid it through a pre-tax payroll deduction, because the IRS treats a premium excluded from your wages as paid by the employer. They are tax-free when you paid the premium with after-tax money, including an individual policy you bought yourself (IRS Publication 525). When the cost is shared, only the part of the benefit that matches the employer's share of the premium over the three previous policy years is taxed: in the IRS example, an employer paying 70% makes ${K.usd(1400)} of each ${K.usd(2000)} check taxable. Employer-funded benefits also carry Social Security and Medicare for the first six calendar months after the last month worked. A ${K.usd(BEN)} monthly benefit paid all year, employer-funded, adds about ${K.usd(fedEmp)} of federal income tax for a single filer with no other income in 2026, plus ${K.usd(ficaEmp)} of payroll tax.`,
+  faqs: [
+    { q: 'Do I pay tax on disability benefits if my employer paid the premium?', a: `Yes. Benefits from a plan paid for by the employer are income, reported on your return, and withholding is often optional, so tax can be due in April. On ${K.usd(YEAR)} of benefits in a year, a single filer with no other income owes about ${K.usd(fedEmp)} of federal income tax in 2026; with ${K.usd(30000)} of wages earlier in the year, the benefits add about ${K.usd(mixed)}.` },
+    { q: 'Is short-term disability through a cafeteria plan taxable?', a: 'Yes, in most cases. IRS Publication 525 says that when the premium of an accident or health plan was not included in your income, as with a pre-tax deduction under a cafeteria plan, you are not considered to have paid it, and the benefits are income. If the premium was included in your taxable wages, you are considered to have paid it, and the benefits are not taxable.' },
+    { q: 'How is a disability benefit taxed when the employer and I share the cost?', a: `Only the employer's share is taxable. IRS Publication 15-A measures it as the share of the policy's cost the employer paid over the three policy years before the year of the benefit. If you paid 30% after tax, ${K.pct(split)} of each check is taxable: on ${K.usd(YEAR)} a year, about ${K.usd(fedSplit)} of federal income tax for a single filer with no other income.` },
+    { q: 'Does Social Security disability make my plan benefit more taxable?', a: `It can make part of the Social Security benefit taxable. Under the Publication 915 worksheet, Social Security becomes partly taxable when other income plus half the award passes a base amount, ${K.usd(K.FED.socialSecurityBenefitBase.single)} for a single filer. With ${K.usd(YEAR)} of taxable plan benefits and ${K.usd(1500)} a month from Social Security, ${K.usd(ssWithLtd)} of the ${K.usd(18000)} award becomes taxable.` },
+    { q: 'Is a disability benefit from a policy I bought myself reported on my return?', a: 'No. If you paid the entire cost of an accident or health plan, IRS Publication 525 says not to include the amounts you receive for personal injury or sickness in income. This covers individual disability income policies bought with after-tax money. A business that pays the premium for its owner, or deducts it, changes the answer, so check how the premium was paid.' },
+  ],
+  body: (h) => `
+<h2>The rule in one sentence</h2>
+<p>The tax rule for a disability benefit follows the tax rule for the premium. A premium paid with money that was taxed gives a tax-free benefit; a premium that escaped tax, because the employer paid it or because it was deducted before tax, gives a taxable benefit. The rule comes from ${h.src('usc_105', 'section 105 of the Internal Revenue Code')} and is explained in ${h.src('irs_p525', 'IRS Publication 525')}, under sickness and injury benefits. It does not depend on the insurer, on the length of the claim or on whether the plan is called short-term or long-term.</p>
+<p>The table under the calculator applies the rule to the five arrangements found in practice: an employer-paid group plan, a group plan paid by pre-tax deduction, a group plan paid after tax, a plan whose cost is shared, and an individual policy. Enter your own benefit and income and the tax changes with them; the ranking between arrangements does not.</p>
+<h2>Pre-tax deductions: the trap</h2>
+<p>Employees often choose the pre-tax option at enrollment because it lowers the tax on every paycheck, without seeing that it moves the tax to the claim. ${h.src('irs_p525', 'Publication 525')} is explicit about cafeteria plans: if the premium was not included in your income, you are not considered to have paid it, and the benefits are income. ${h.src('irs_p15a', 'Publication 15-A')} says the same from the employer's side: contributions made with employees' pre-tax dollars under a cafeteria plan are employer contributions. The saving on the premium is small, a percentage of a few hundred dollars a year; the tax on a claim is a percentage of thousands of dollars a month. The ${h.a('pre-tax-vs-after-tax-disability-premiums', 'election calculator')} sets one against the other.</p>
+${h.mini('premium', { t: 'Pre-tax savings against the tax on one claim', p: ['sal', 'prem'] })}
+<h2>Shared premiums and the three-year rule</h2>
+<p>When both the employer and the employees pay for a group policy, the taxable share of each benefit is the employer's share of the policy's cost over the three policy years before the calendar year of the payment. If the policy is newer, the years in effect are used. The IRS example in Publication 15-A: an employee is paid ${K.usd(2000)} a month for three months under a policy whose cost was paid 70% by the employer and 30% by employees with after-tax money; ${K.usd(1400)} of each payment is taxable sick pay, and the remaining ${K.usd(600)} is neither taxable nor subject to employment taxes. Your employer or the insurer applies the percentage; the calculator uses the after-tax share you enter in the options.</p>
+<h2>Social Security, Medicare and withholding</h2>
+<p>A taxable benefit from an employer plan is sick pay. Social Security at ${K.pct(K.FED.socialSecurityRate, 1)} and Medicare at ${K.pct(K.FED.medicareRate, 2)} apply to it until ${K.num(K.FED.sickPayFicaMonths)} calendar months have passed after the last month you worked, as in the Publication 15-A example of an employee who stopped work in December 2025 and owes no payroll tax on sick pay paid after June 30, 2026. A day of work during the claim restarts the count. Income tax withholding on sick pay paid by an insurer is usually voluntary, requested on Form W-4S; without it, a long claim can leave a large balance due, and estimated payments may be needed.</p>
+<h2>What the benefit does to the rest of the return</h2>
+<p>A taxable benefit is added to your other income for the year, so the tax it adds depends on what else you earned. A claim that starts in the autumn falls on top of most of a year's wages and is taxed at your usual rate; a claim that runs a full year with no wages is taxed from the bottom of the brackets, after the standard deduction of ${K.usd(K.FED.standardDeduction.single)} for a single filer in 2026 (${h.src('irs_rp_2025_32', 'Revenue Procedure 2025-32')}). A Social Security disability award brings its own rule: up to 85% of it can be taxable, depending on your other income (${h.src('irs_p915', 'Publication 915')}). The ${h.a('ltd-social-security-offset', 'offset page')} shows how the award reduces the plan check.</p>
+<h2>State tax</h2>
+<p>State rules are not computed here. States generally start from federal income, but each one has its own exclusions, and a benefit paid by a state disability program is a separate case.</p>
+`,
+  tool: 'tax',
+  related: ['pre-tax-vs-after-tax-disability-premiums', 'long-term-disability-insurance', 'short-term-disability-insurance', 'disability-insurance-self-employed'],
+  sources: ['irs_p525', 'irs_p15a', 'usc_105', 'irs_p915', 'irs_p15', 'irs_rp_2025_32'],
+});

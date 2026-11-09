@@ -1,0 +1,41 @@
+import { definePage } from '../../lib/page-types';
+import { KIT as K } from '../../lib/kit';
+
+const INC = 90000, BEN = 4500, PREM = 160;
+const eq = K.need({ need: BEN, otherMonthly: 0, payer: 'employer', employeeShare: 0, st: 'single' }).gross;
+const after = INC - K.taxOn(INC, 'single');
+const ltc = K.ltcDed({ age: 52, premium: 2500, income: INC, otherMedical: 0, otherItemized: 0, st: 'single', path: 'self', seProfit: INC });
+
+export default definePage({
+  id: 'disability-insurance-self-employed', group: 'disability', order: 111, slug: 'disability-insurance-self-employed',
+  nav: 'Self-employed coverage', card: 'For freelancers and business owners: a tax-free benefit against profit, the quoted premium, and what a taxable benefit would need.',
+  title: 'Self-Employed Disability Insurance 2026: Tax-Free Benefit',
+  description: 'Self-employed disability insurance in 2026: a benefit bought with after-tax money pays tax-free. Compare it with your profit and the premium on your quote.',
+  h1: 'Disability insurance for the self-employed',
+  intro: 'Enter your net profit, the monthly benefit and the premium on your quote. The calculator compares the tax-free benefit with what you keep from your profit today.',
+  resume: `A self-employed person has no group plan, no sick pay and no employer premium, so a disability stops the business income at once. An individual disability income policy paid with after-tax money pays its benefit tax-free: IRS Publication 525 says amounts received from a plan whose entire cost you paid are not income. A ${K.usd(BEN)} monthly benefit therefore replaces ${K.usd(BEN)} of spending money; a taxable benefit would have to be about ${K.usd(eq)} to leave the same amount for a single filer in 2026. Against a net profit of ${K.usd(INC)}, which leaves about ${K.usd(after / 12)} a month after federal income tax, that benefit replaces most of the household's money. A policy at ${K.usd(PREM)} a month costs ${K.pct(PREM * 12 / INC, 1)} of profit. Business owners often add business overhead expense coverage, which pays the fixed costs of the business while the owner cannot work and is a separate contract.`,
+  faqs: [
+    { q: 'Are disability insurance benefits taxable for the self-employed?', a: `Not when you paid the premium with your own after-tax money, which is the usual case for a sole proprietor or freelancer. IRS Publication 525 excludes benefits from a plan whose entire cost you paid. A ${K.usd(BEN)} monthly benefit then reaches you in full, where a taxable one would need about ${K.usd(eq)}.` },
+    { q: 'How much disability coverage can a self-employed person buy?', a: 'Insurers base the benefit they will issue on earned income shown on tax returns, typically net profit from Schedule C or wages and distributions from your own company, averaged over recent years. A new business with little history can get less than its current profit suggests. The calculator compares any benefit with your profit; the insurer decides what it will issue.' },
+    { q: 'What is business overhead expense insurance?', a: 'A separate policy that reimburses the fixed costs of running a business, such as rent, utilities, staff salaries and equipment leases, while the owner is disabled, usually for a limited period such as one or two years. It does not replace the owner’s own income, which is what a disability income policy is for. Its tax rules differ because it covers business expenses.' },
+    { q: 'Can the self-employed deduct long-term care insurance premiums?', a: `Yes, within the age limit for the year, through the self-employed health insurance deduction on Form 7206, which is limited by the net profit of the business. At 52, the 2026 limit is ${K.usd(K.ltcLimit(52))}; with ${K.usd(INC)} of profit, a ${K.usd(2500)} premium saves about ${K.usd(ltc.saved)} of federal income tax. Disability income premiums do not qualify for that deduction.` },
+  ],
+  body: (h) => `
+<h2>Why the self-employed are exposed</h2>
+<p>An employee who falls ill keeps a paycheck for a while: sick days, perhaps a short-term disability plan, then long-term disability for ${K.bp(K.G('Private industry').ltd)} of private workers (${h.src('bls_ebs_2026', 'BLS, March 2026')}). A freelancer, a consultant or a sole proprietor has none of that. When work stops, invoices stop, and the business costs keep running. The only income protection is the one you buy, which makes its terms and its tax rule worth reading closely.</p>
+<h2>The tax advantage of paying yourself</h2>
+<p>${h.src('irs_p525', 'IRS Publication 525')} is clear: if you pay the entire cost of an accident or health plan, the amounts you receive for personal injury or sickness are not income. For an individual disability income policy paid from your own after-tax money, the benefit arrives untaxed. The calculator uses that rule: the benefit is compared with your profit after federal income tax, and the second line shows the taxable benefit that would leave the same amount, ${K.usd(eq)} for ${K.usd(BEN)} in the example. If your company pays the premium for you as an employee benefit and deducts it, the result changes: the benefit can become taxable, as with any employer-paid plan.</p>
+${h.mini('self', { t: 'Your benefit against your profit', p: ['inc', 'ben'] })}
+<h2>Sizing the benefit</h2>
+<p>Start from the money the household needs each month, not from profit: the ${h.a('how-much-disability-insurance-do-i-need', 'needs calculator')} converts a budget into a benefit. Then check it against the insurer's view: underwriters look at earned income on your returns over the last years and issue a benefit that leaves you with less than working would. Volatile income means a lower figure than a good year suggests. If profit is rising, a future increase option lets you raise the benefit later without new health questions.</p>
+<h2>Terms that matter more without an employer</h2>
+<p>The definition of disability decides whether you can keep running part of the business while on claim. An ${h.a('own-occupation-disability-insurance', 'own-occupation')} contract pays if you cannot do your own work, even if you manage the company or work in another field; a residual benefit pays a share when your income falls because you can only work part of the time, which is the common case for business owners. The ${h.a('elimination-period', 'elimination period')} has to be carried by savings, with no sick pay to bridge it. The ${h.a('disability-insurance-cost', 'cost page')} measures each quote.</p>
+<h2>Health and long-term care premiums are another matter</h2>
+<p>The self-employed health insurance deduction, figured on ${h.src('irs_f7206', 'Form 7206')}, covers medical and dental insurance and qualified long-term care premiums, these last within the 2026 age limits of ${h.src('irs_rp_2025_32', 'Revenue Procedure 2025-32')}, and never more than the net profit of the business. A disability income policy is not health insurance for this purpose. The ${h.a('long-term-care-insurance-tax-deduction', 'long-term care deduction calculator')} has a self-employed option.</p>
+<h2>Business overhead expense coverage</h2>
+<p>A disability income policy replaces your own income. A business overhead expense policy pays the fixed costs of the business, rent, utilities, employees' salaries, while you cannot work, usually for one or two years, so that there is a business to return to. The two are often sold together. Their tax rules differ, and an accountant should look at how the overhead policy is paid and reported.</p>
+`,
+  tool: 'self',
+  related: ['how-much-disability-insurance-do-i-need', 'disability-insurance-cost', 'own-occupation-disability-insurance', 'long-term-care-insurance-tax-deduction'],
+  sources: ['irs_p525', 'irs_f7206', 'irs_rp_2025_32', 'bls_ebs_2026'],
+});

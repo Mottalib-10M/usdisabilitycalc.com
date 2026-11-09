@@ -1,0 +1,24 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { CONTACT_EMAIL } from '../../data/site-config';
+import { contactPageSchema } from '../../lib/seo';
+const lang = 'en';
+const path = route('contact', lang);
+const description = 'Write to US Disability Calc about an IRS limit, a plan figure or a tax rule that changed. E-mail only: no quote, no policy sold, nothing passed on to an insurer.';
+---
+<PageLayout title="Contact US Disability Calc: report a limit or a rule that moved" description={description} lang={lang} noindex={true} jsonLd={[contactPageSchema({ name: 'Contact', description, path, lang })]} breadcrumbs={[{ label: 'Contact' }]} showAuthor={false}>
+  <article class="prose prose-slate max-w-none prose-headings:font-serif">
+    <h1>Contact</h1>
+    <p>By e-mail: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. There is no form and no phone line, and nothing you write is passed on to an insurer, a broker or anyone else.</p>
+    <h2>What helps us most</h2>
+    <ul>
+      <li>A new IRS figure: a revenue procedure or publication that changes a bracket, a premium limit or the per diem limit, with its number.</li>
+      <li>A rule we read wrong: quote the IRS publication or the section of the Internal Revenue Code that says otherwise.</li>
+      <li>A plan clause the calculators do not handle, as written in a summary plan description.</li>
+      <li>Embedding the calculator on an HR, union or library page: the code is on the <a href={route('widget', lang)}>embed page</a>.</li>
+    </ul>
+    <h2>What we cannot do</h2>
+    <p>We do not quote or sell insurance, review a denied claim, recommend an insurer or a lawyer, or say whether your own benefit is taxable on your return. Your plan administrator, your insurer and a tax professional are the ones who can.</p>
+  </article>
+</PageLayout>

@@ -1,0 +1,2 @@
+# Point d appel de l API publique du BLS (POST), lu par scripts/data/build-bls.py : pas une source citée.
+https://api.bls.gov/publicAPI/

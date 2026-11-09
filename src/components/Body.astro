@@ -1,0 +1,12 @@
+---
+/** The HTML body of a content file, with its mini-simulators rendered as islands. */
+import MiniSim from './calc/MiniSim';
+import { miniHref } from '../lib/mini-targets';
+interface Props { html: string; path: string }
+const { html, path } = Astro.props;
+const parts = html.split(/<!--mini:([A-Za-z0-9_]+)(?:\|([A-Za-z0-9+/=]+))?-->/);
+const decode = (b?: string) => (b ? Buffer.from(b, 'base64').toString('utf8') : undefined);
+---
+<div class="prose prose-slate max-w-none prose-headings:font-serif">
+  {parts.map((p, i) => i % 3 === 0 ? <Fragment set:html={p ?? ''} /> : i % 3 === 1 ? <div data-chrome class="not-prose"><MiniSim client:load kind={p} arg={decode(parts[i + 1])} href={miniHref(p, path)} /></div> : null)}
+</div>

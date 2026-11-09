@@ -1,0 +1,31 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import LegalIdentity from '../../components/LegalIdentity.astro';
+import { route } from '../../i18n/routes';
+import { AUTHOR_NAME, AUTHOR_DESC, CONTACT_EMAIL } from '../../data/site-config';
+import { VALUE } from '../../content/home';
+import { KIT as K } from '../../lib/kit';
+import { profilePageSchema, breadcrumbSchema } from '../../lib/seo';
+const lang = 'en';
+const path = route('about', lang);
+const title = 'Disability Calculators 2026: Who Publishes This Site';
+const description = 'US Disability Calc in 2026: who publishes these disability and long-term care calculators, the IRS and BLS data behind them, and what the site never sells.';
+---
+<PageLayout title={title} description={description} lang={lang} jsonLd={[profilePageSchema({ path, lang }), breadcrumbSchema([{ name: 'Home', path: route('home', lang) }, { name: 'About', path }])]} breadcrumbs={[{ label: 'About' }]}>
+  <article class="prose prose-slate max-w-none prose-headings:font-serif">
+    <h1>About US Disability Calc</h1>
+    <p>{AUTHOR_DESC.en}</p>
+    <h2>Why it exists</h2>
+    <p>Someone comparing a disability policy, choosing a payroll election at open enrollment or filing a first claim asks a plain question: how much will reach my account each month, and for how long. The pages that rank for it are written by insurers and brokers who want a quote request, or by law firms who want a case. They give a premium range with no source, a 60% rule with no maximum, and they rarely mention that the IRS taxes some benefits in full and others not at all.</p>
+    <p>{VALUE}</p>
+    <h2>Who publishes it</h2>
+    <p>The site is published by {AUTHOR_NAME}, a company that builds calculators on public rules. It is an independent site, not an insurer or a broker. It sells no policy, takes no commission, has no partner to send you to, carries no affiliate link and asks for no contact details.</p>
+    <LegalIdentity lang={lang} />
+    <h2>What it relies on</h2>
+    <p>The 2026 federal tax figures of Revenue Procedures 2025-32 and 2025-19, IRS Publications 525, 15, 15-A, 502, 915 and 969, the sections of the Internal Revenue Code on accident and health plans and on long-term care contracts, the National Compensation Survey of the Bureau of Labor Statistics for March 2026 ({K.GROUPS.length} groups of workers and the plan provisions of private industry and state and local government), and the FEGLI handbook of the Office of Personnel Management.</p>
+    <h2>What it leaves out</h2>
+    <p>Premium prices, which no public source publishes; medical questions of any kind; whether a claim will be approved; state income tax; the Social Security disability rules themselves. The <a href={route('method', lang)}>method page</a> lists every simplification and the <a href={route('editorial', lang)}>editorial policy</a> explains corrections.</p>
+    <h2>Contact</h2>
+    <p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>, for a limit that changed or a rule we read wrong. We answer questions about a figure or a document, not about your own policy or claim, which only your insurer or plan administrator can decide.</p>
+  </article>
+</PageLayout>

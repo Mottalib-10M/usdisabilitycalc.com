@@ -1,0 +1,51 @@
+---
+/** Method: the documents, how each rule is applied, worked examples, the limits. Figures from the kit. */
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { KIT as K } from '../../lib/kit';
+import { src, table } from '../../lib/helpers';
+import { VALUE } from '../../content/home';
+import { breadcrumbSchema, webPageSchema } from '../../lib/seo';
+const lang = 'en';
+const path = route('method', lang);
+const title = 'Disability Benefit Method 2026: IRS Rules and BLS Data';
+const description = `Disability benefit method for 2026: plan formula and maximum, Social Security offset, tax by premium payer, IRS long-term care limits, BLS data of March 2026.`;
+const ex = K.ltd({ salary: 90000, pct: 0.6, cap: 4000, ssdi: 1500, otherOffsets: 0, minBenefit: 0, payer: 'employer', employeeShare: 0, st: 'single', otherIncome: 0, elimDays: 90 });
+const P = K.PRIV;
+const provRows = [
+  ['Workers covered whose employer pays the whole premium', K.bp(P.std_employee_pays_none), K.bp(P.ltd_employee_pays_none)],
+  ['Median share of earnings replaced (fixed-percentage plans)', K.bp(P.std_median_pct), K.bp(P.ltd_median_pct)],
+  ['Maximum benefit, 10th percentile', `${K.usd(P.std_max_weekly_p10!)} a week`, `${K.usd(P.ltd_max_monthly_p10!)} a month`],
+  ['Maximum benefit, median', `${K.usd(P.std_max_weekly_p50!)} a week`, `${K.usd(P.ltd_max_monthly_p50!)} a month`],
+  ['Maximum benefit, 90th percentile', `${K.usd(P.std_max_weekly_p90!)} a week`, `${K.usd(P.ltd_max_monthly_p90!)} a month`],
+  ['Weeks of short-term benefit, median', `${K.num(P.std_weeks_p50!)}`, 'not applicable'],
+];
+---
+<PageLayout title={title} description={description} lang={lang} jsonLd={[webPageSchema({ name: 'How the figures are built', description, path, lang }), breadcrumbSchema([{ name: 'Home', path: route('home', lang) }, { name: 'How the figures are built', path }])]} breadcrumbs={[{ label: 'How the figures are built' }]}>
+  <article class="prose prose-slate max-w-none prose-headings:font-serif">
+    <h1>How the figures are built</h1>
+    <p><strong>Every calculator applies the benefit formula of your plan to the figures you enter, subtracts the offsets the plan lists, then applies the 2026 federal tax rules the IRS publishes, with the share of the benefit that is taxable set by who paid the premium. Every rule is stored with the document it was read in, on {K.day(K.RETRIEVED)}.</strong></p>
+    <p>{VALUE}</p>
+    <h2>1. The benefit formula</h2>
+    <p>Long-term disability: the monthly salary you enter times the share of pay in the plan, limited by the monthly maximum. Offsets (Social Security disability and family benefits, other income the plan lists) are subtracted from that amount; if the plan has a minimum monthly benefit and you enter it, the result never falls below it. Short-term disability works the same way by the week, over the number of weeks you enter, after the waiting period. The calculators do not apply a cost-of-living rider, a partial (residual) benefit or a definition of earnings that includes bonus; enter the figure your plan uses.</p>
+    <h2>2. Federal tax by premium payer</h2>
+    <p>The share of the benefit that is taxable follows <Fragment set:html={src('irs_p525', 'IRS Publication 525')} /> and <Fragment set:html={src('usc_105', 'section 105 of the Internal Revenue Code')} />: all of it when the employer pays the premium or when you pay it by pre-tax payroll deduction through a cafeteria plan, none of it when you pay with after-tax money or buy an individual policy. For a plan whose cost is shared, the employer's share of the premium over the three policy years before the current year is the taxable share, as in the example of <Fragment set:html={src('irs_p15a', 'Publication 15-A (2026)')} />: with an employer paying 70%, {K.usd(1400)} of each {K.usd(2000)} payment is taxable sick pay. Income tax is the tax on your other income plus the taxable benefit, minus the tax on your other income alone, with the 2026 brackets and standard deduction of <Fragment set:html={src('irs_rp_2025_32', 'Revenue Procedure 2025-32')} /> and no credit.</p>
+    <p>Social Security at {K.pct(K.FED.socialSecurityRate, 1)} up to {K.usd(K.FED.socialSecurityWageBase)} and Medicare at {K.pct(K.FED.medicareRate, 2)} (<Fragment set:html={src('irs_p15', 'Publication 15')} />) apply to the taxable part of sick pay paid in the first {K.num(K.FED.sickPayFicaMonths)} calendar months after the last month worked; the calculators count those months from the end of the waiting period. Social Security disability benefits are taxed with the worksheet of <Fragment set:html={src('irs_p915', 'Publication 915')} />, base amounts {K.usd(K.FED.socialSecurityBenefitBase.single)} single and {K.usd(K.FED.socialSecurityBenefitBase.mfj)} married filing jointly.</p>
+    <h2>3. Long-term care</h2>
+    <p>Premium limits by age for 2026 and 2025 come from Revenue Procedures 2025-32 and <Fragment set:html={src('irs_rp_2024_40', '2024-40')} />, the per diem limit ({K.usd(K.LTC.perDiem2026)} a day in 2026, {K.usd(K.LTC.perDiem2025)} in 2025) from the same documents and <Fragment set:html={src('usc_7702b', 'section 7702B')} />. The deduction calculator compares the tax with and without the premium: as an itemized medical expense above {K.pct(K.FED.medicalExpenseFloor, 1)} of adjusted gross income (<Fragment set:html={src('irs_p502', 'Publication 502')} />) and against the standard deduction; as a self-employed health insurance deduction limited by net profit (<Fragment set:html={src('irs_f7206', 'Form 7206')} />); or paid from a health savings account (<Fragment set:html={src('irs_p969', 'Publication 969')} />). The per diem calculator follows the logic of <Fragment set:html={src('irs_f8853', 'Form 8853')} />.</p>
+    <h2>4. Plan data of the Bureau of Labor Statistics</h2>
+    <p>Access rates and plan provisions come from the National Compensation Survey, reference month March 2026 (<Fragment set:html={src('bls_ebs_2026', 'Employee Benefits in the United States, March 2026')} />). The bureau's web pages refuse automated reading, so the series were read through its <Fragment set:html={src('bls_api', 'public data interface')} /> on {K.day(K.RETRIEVED)}; only values for 2026 are kept, never an earlier year passed off as current. The tables cover {K.GROUPS.length} groups of workers. BLS material is in the public domain.</p>
+    <Fragment set:html={table(['Private industry, March 2026', 'Short-term disability', 'Long-term disability'], provRows, 'Plan provisions used as defaults in the calculators. Bureau of Labor Statistics, National Compensation Survey.', ['l', 'r', 'r'])} />
+    <h2>5. A worked example</h2>
+    <p>A single filer earning {K.usd(90000)}, an employer-paid plan at 60% with a {K.usd(4000)} monthly maximum, and a Social Security award of {K.usd(1500)} a month: the formula gives {K.usd(ex.formula)}, the maximum cuts it to {K.usd(ex.gross)}, the offset leaves {K.usd(ex.net)} paid by the plan. Over a year, the plan benefit and the taxable part of Social Security ({K.usd(ex.ssTaxableYear)}) add {K.usd(ex.fedMonthly * 12)} of federal income tax, so about {K.usd(ex.inHand)} a month reaches the account from both sources, against a take-home pay of {K.usd(ex.takeHomeMonthly)}.</p>
+    <h2>6. Limits</h2>
+    <ul>
+      <li>No premium price is published. No official source gives disability, long-term care or accident rates that may be reproduced; the cost calculators use the premium on your own quote.</li>
+      <li>The Social Security disability amount is always your figure: the agency's pages could not be read for this site and its rules are not reproduced.</li>
+      <li>State income tax and state disability programs are left out.</li>
+      <li>Withholding is not computed: the calculators show the tax owed on the year, not what an insurer withholds from each check.</li>
+      <li>Nothing here is tax or legal advice; your policy and your return decide.</li>
+    </ul>
+    <p>Corrections: <a href={route('contact', lang)}>contact page</a>.</p>
+  </article>
+</PageLayout>

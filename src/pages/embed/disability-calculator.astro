@@ -1,0 +1,21 @@
+---
+/** Embeddable page (iframe): the calculator alone. noindex, outside the sitemap (astro.config). */
+import '../../styles/global.css';
+import Tool from '../../components/Tool.astro';
+import { SITE_URL, SITE_NAMES } from '../../data/site-config';
+---
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Disability benefit after tax calculator (widget)</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={`${SITE_URL}/en/`} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  </head>
+  <body class="bg-white p-2 text-navy-900">
+    <main><Tool kind="all" idPrefix="embed" /></main>
+    <p class="mt-2 text-center text-xs text-navy-600"><a href={`${SITE_URL}/en/`} target="_blank" rel="noopener" class="underline">{SITE_NAMES.en}</a> · 2026 federal tax rules · an estimate, your plan decides</p>
+  </body>
+</html>

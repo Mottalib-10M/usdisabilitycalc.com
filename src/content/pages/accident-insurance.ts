@@ -1,0 +1,39 @@
+import { definePage } from '../../lib/page-types';
+import { KIT as K } from '../../lib/kit';
+
+const H = K.HSA;
+const a = K.cash({ payout: 2500, premium: 240, deductible: H.hdhpMinDeductible.self, oop: H.hdhpMaxOutOfPocket.self });
+const b = K.cash({ payout: 2500, premium: 240, deductible: 500, oop: 3000 });
+const fam = K.cash({ payout: 4000, premium: 480, deductible: H.hdhpMinDeductible.family, oop: H.hdhpMaxOutOfPocket.family });
+
+export default definePage({
+  id: 'accident-insurance', group: 'accident', order: 302, slug: 'accident-insurance',
+  nav: 'Accident insurance', card: 'What a cash accident benefit covers of your health plan’s deductible and out-of-pocket maximum, against the premium you pay.',
+  title: 'Accident Insurance 2026: The Cash Benefit Against Your Bills',
+  description: 'Accident insurance in 2026: what a cash benefit for an injury covers of your plan deductible and out-of-pocket maximum, and the years of premium it equals.',
+  h1: 'Accident insurance: what the cash benefit covers',
+  intro: 'Enter the cash the policy pays for the event, its yearly premium, and the deductible and out-of-pocket maximum of your health plan. The share of your worst-case bill it covers appears at once.',
+  resume: `Accident insurance pays fixed cash amounts for injuries and the care that follows them, according to a schedule in the policy: so much for an emergency room visit, a fracture, an ambulance ride or a hospital admission. It does not pay your medical bills; it pays you, whatever the bills are, and you can use the money for anything. Its value depends on the health plan beside it. A high-deductible plan that qualifies for a health savings account must have a deductible of at least ${K.usd(H.hdhpMinDeductible.self)} for self-only coverage in 2026, and can leave up to ${K.usd(H.hdhpMaxOutOfPocket.self)} out of pocket (Revenue Procedure 2025-19). A ${K.usd(2500)} accident payment covers ${K.pct(a.deductibleShare)} of that minimum deductible and ${K.pct(a.oopShare)} of the out-of-pocket ceiling. With a ${K.usd(240)} yearly premium, the payment equals ${K.dec(a.yearsOfPremium, 1)} years of premiums. Bought with after-tax money, accident benefits are not taxable (IRS Publication 525).`,
+  faqs: [
+    { q: 'What does accident insurance pay for?', a: 'Fixed amounts for events listed in the policy schedule after an accident: emergency care, ambulance, imaging, fractures and dislocations, hospital admission and days in hospital, follow-up visits, sometimes accidental death. The schedule sets an amount per event, not a share of the bill. Read it with your health plan: the events that cost you most under the plan are the ones that matter.' },
+    { q: 'Is accident insurance worth it with a high-deductible health plan?', a: `It is closer to worth it than with a low-deductible plan, because more of the first bills are yours. With the ${K.usd(H.hdhpMinDeductible.self)} minimum deductible of 2026, a ${K.usd(2500)} payment covers ${K.pct(a.deductibleShare)} of it; with a ${K.usd(500)} deductible plan and a ${K.usd(3000)} out-of-pocket maximum, it would cover ${K.pct(b.oopShare)} of the worst case. An emergency fund or HSA balance does the same job without a premium.` },
+    { q: 'Are accident insurance benefits taxable?', a: 'Not when you paid the premium with after-tax money: IRS Publication 525 excludes benefits from an accident or health policy you paid for. When the employer pays, or you pay by pre-tax deduction, cash benefits that are not reimbursements of medical costs and not payments for a permanent loss can be income. Your benefits portal shows how the premium is deducted.' },
+    { q: 'Does accident insurance count toward my health plan deductible?', a: 'No. It is not health coverage and pays you, not the provider, so the bills still go through your health plan and its deductible as usual. You use the cash to pay your share. For the same reason, accident insurance does not affect eligibility for a health savings account.' },
+  ],
+  body: (h) => `
+<h2>Fixed cash, not coverage</h2>
+<p>An accident policy is an indemnity contract: it pays a set amount when an event in its schedule happens after an accident, whether the bill is large, small or paid by your health plan. That is both its advantage and its limit. The money arrives quickly and can pay rent as well as a hospital bill, but the amount does not follow the cost, and an event missing from the schedule pays nothing. Policies sold at work are often voluntary, paid by the employee through payroll deduction.</p>
+<p>The calculator measures the payment against two figures from your health plan. The deductible is what you pay before the plan pays; the out-of-pocket maximum is the most you can pay in a year for covered care. Defaults are the floors and ceilings for plans that qualify for a health savings account in 2026, ${K.usd(H.hdhpMinDeductible.self)} and ${K.usd(H.hdhpMaxOutOfPocket.self)} for self-only coverage, ${K.usd(H.hdhpMinDeductible.family)} and ${K.usd(H.hdhpMaxOutOfPocket.family)} for family coverage (${h.src('irs_rp_2025_19', 'Revenue Procedure 2025-19')}). Your own plan's figures are on its summary of benefits and coverage.</p>
+${h.mini('cash', { t: 'Your accident payment against your plan', p: ['pay', 'oop'], d: { pay: 2500, prem: 240 } })}
+<h2>Reading the result</h2>
+<p>The share of the out-of-pocket maximum is the most useful number: it is the part of your worst year the payment would cover. The share of the deductible tells you how much of a modest accident it pays. The years of premium compare the payment with what you spend on the policy. For a family on a high-deductible plan, a ${K.usd(4000)} payment covers ${K.pct(fam.oopShare)} of a ${K.usd(H.hdhpMaxOutOfPocket.family)} family maximum; at ${K.usd(480)} a year, it equals ${K.dec(fam.yearsOfPremium, 1)} years of premium.</p>
+<p>None of these figures includes the probability of an accident, which the insurer knows and you do not. What they give is a sense of scale: whether the cash you would receive is meaningful against the bills you could face, and whether savings or a health savings account could do the same job.</p>
+<h2>Tax on accident benefits</h2>
+<p>${h.src('irs_p525', 'IRS Publication 525')} excludes benefits from an accident or health policy whose premiums you paid, or whose premiums your employer paid but included in your income. Reimbursements of medical care are generally not taxable either. When the employer pays the premium or you pay it by pre-tax deduction, fixed cash payments that do not reimburse medical costs and are not paid for a permanent loss fall under the general rule for employer-funded plans and can be income. Payments for a permanent loss or loss of use of a part of the body stay excluded in every case (${h.src('usc_105', 'section 105(c)')}).</p>
+<h2>Accident insurance and its neighbors</h2>
+<p>Three products are often sold together. Accident insurance pays for injuries; ${h.a('hospital-indemnity-insurance', 'hospital indemnity insurance')} pays for admissions and days in hospital whatever the cause; ${h.a('critical-illness-insurance', 'critical illness insurance')} pays a lump sum when a condition listed in the policy is confirmed. ${h.a('accidental-death-and-dismemberment-insurance', 'AD&D')} pays larger sums for death or a lost limb or sense. Overlapping them adds premiums for the same events; the calculators on each page use the same health plan figures so they can be compared. None of them replaces income if an injury keeps you from working for months, which is the job of ${h.a('long-term-disability-insurance', 'disability insurance')}.</p>
+`,
+  tool: 'cash',
+  related: ['hospital-indemnity-insurance', 'critical-illness-insurance', 'accidental-death-and-dismemberment-insurance', 'short-term-disability-insurance'],
+  sources: ['irs_rp_2025_19', 'irs_p525', 'irs_p969', 'usc_105'],
+});

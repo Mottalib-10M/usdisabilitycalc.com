@@ -1,0 +1,64 @@
+{
+  "_lisezmoi": "Paramètres fédéraux 2026 et registre des sources. Chaque valeur a été relue le 2026-11-07 dans le document officiel cité (PDF irs.gov et opm.gov lus par curl) ; les citations sont dans notes/releve-2026-11-07.md. Données du BLS : bls-ncs-2026.json, produit par scripts/data/build-bls.py.",
+  "year": 2026,
+  "retrieved_at": "2026-11-07",
+  "valid_from": "2026-01-01",
+  "valid_to": "2026-12-31",
+  "federal": {
+    "_doc": "Rev. Proc. 2025-32 §4.01 (barèmes) et §4.14 (déduction standard), années commençant en 2026. Pub. 15 (2026) : base sociale et taux. Pub. 15-A (2026) : 6 mois civils pour les cotisations sur sick pay. Pub. 915 : seuils de la part imposable des prestations Social Security.",
+    "standardDeduction": { "single": 16100, "mfj": 32200, "hoh": 24150 },
+    "brackets": {
+      "single": [[12400, 0.1], [50400, 0.12], [105700, 0.22], [201775, 0.24], [256225, 0.32], [640600, 0.35], [null, 0.37]],
+      "mfj": [[24800, 0.1], [100800, 0.12], [211400, 0.22], [403550, 0.24], [512450, 0.32], [768700, 0.35], [null, 0.37]],
+      "hoh": [[17700, 0.1], [67450, 0.12], [105700, 0.22], [201750, 0.24], [256200, 0.32], [640600, 0.35], [null, 0.37]]
+    },
+    "socialSecurityRate": 0.062,
+    "socialSecurityWageBase": 184500,
+    "medicareRate": 0.0145,
+    "sickPayFicaMonths": 6,
+    "socialSecurityBenefitBase": { "single": 25000, "mfj": 32000, "hoh": 25000 },
+    "socialSecurityBenefitAdjustedBase": { "single": 34000, "mfj": 44000, "hoh": 34000 },
+    "medicalExpenseFloor": 0.075
+  },
+  "ltc": {
+    "_doc": "Rev. Proc. 2025-32 §4.27 (213(d)(10)) et §4.62 (7702B(d)(4)) pour 2026 ; Rev. Proc. 2024-40 §3.28 et §3.62 pour 2025. Âge atteint à la fin de l'année fiscale ; borne haute incluse.",
+    "premiumLimits2026": [[40, 500], [50, 930], [60, 1860], [70, 4960], [null, 6200]],
+    "premiumLimits2025": [[40, 480], [50, 900], [60, 1800], [70, 4810], [null, 6020]],
+    "perDiem2026": 430,
+    "perDiem2025": 420
+  },
+  "hsa": {
+    "_doc": "Rev. Proc. 2025-19 §2.01, année civile 2026.",
+    "contribution": { "self": 4400, "family": 8750 },
+    "hdhpMinDeductible": { "self": 1700, "family": 3400 },
+    "hdhpMaxOutOfPocket": { "self": 8500, "family": 17000 }
+  },
+  "fegliADD": {
+    "_doc": "OPM, FEGLI Handbook, Accidental death and dismemberment : décès = BIA ; perte d'une main, d'un pied ou de la vue d'un œil = moitié du BIA ; deux pertes ou plus dans le même accident = BIA entier ; total d'un accident plafonné au BIA. Exemple d'Ileana (BIA 42 000 $) repris en test.",
+    "death": 1,
+    "oneLoss": 0.5,
+    "twoOrMore": 1,
+    "capPerAccident": 1
+  },
+  "sources": {
+    "irs_rp_2025_32": { "url": "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf", "label": { "en": "IRS, Revenue Procedure 2025-32: 2026 tax brackets, standard deduction, long-term care premium limits and per diem" } },
+    "irs_rp_2024_40": { "url": "https://www.irs.gov/pub/irs-drop/rp-24-40.pdf", "label": { "en": "IRS, Revenue Procedure 2024-40: the same limits for 2025" } },
+    "irs_rp_2025_19": { "url": "https://www.irs.gov/pub/irs-drop/rp-25-19.pdf", "label": { "en": "IRS, Revenue Procedure 2025-19: 2026 HSA and high deductible health plan limits" } },
+    "irs_p525": { "url": "https://www.irs.gov/publications/p525", "label": { "en": "IRS, Publication 525, Taxable and Nontaxable Income: sickness and injury benefits, long-term care contracts" } },
+    "irs_p15a": { "url": "https://www.irs.gov/publications/p15a", "label": { "en": "IRS, Publication 15-A (2026), Employer's Supplemental Tax Guide: sick pay" } },
+    "irs_p15": { "url": "https://www.irs.gov/publications/p15", "label": { "en": "IRS, Publication 15 (2026), Employer's Tax Guide: Social Security wage base and Medicare rate" } },
+    "irs_p502": { "url": "https://www.irs.gov/publications/p502", "label": { "en": "IRS, Publication 502, Medical and Dental Expenses: qualified long-term care premiums" } },
+    "irs_p969": { "url": "https://www.irs.gov/publications/p969", "label": { "en": "IRS, Publication 969, Health Savings Accounts and Other Tax-Favored Health Plans" } },
+    "irs_p915": { "url": "https://www.irs.gov/publications/p915", "label": { "en": "IRS, Publication 915, Social Security and Equivalent Railroad Retirement Benefits" } },
+    "irs_f8853": { "url": "https://www.irs.gov/forms-pubs/about-form-8853", "label": { "en": "IRS, Form 8853: long-term care insurance contracts and per diem payments" } },
+    "irs_f7206": { "url": "https://www.irs.gov/forms-pubs/about-form-7206", "label": { "en": "IRS, Form 7206, Self-Employed Health Insurance Deduction" } },
+    "usc_105": { "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title26/html/USCODE-2023-title26-subtitleA-chap1-subchapB-partIII-sec105.htm", "label": { "en": "26 U.S.C. §105, amounts received under accident and health plans (GovInfo)" } },
+    "usc_101": { "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title26/html/USCODE-2023-title26-subtitleA-chap1-subchapB-partIII-sec101.htm", "label": { "en": "26 U.S.C. §101, life insurance proceeds and accelerated death benefits (GovInfo)" } },
+    "usc_213": { "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title26/html/USCODE-2023-title26-subtitleA-chap1-subchapB-partVII-sec213.htm", "label": { "en": "26 U.S.C. §213, medical expense deduction (GovInfo)" } },
+    "usc_7702b": { "url": "https://www.govinfo.gov/content/pkg/USCODE-2023-title26/html/USCODE-2023-title26-subtitleF-chap79-sec7702B.htm", "label": { "en": "26 U.S.C. §7702B, qualified long-term care insurance (GovInfo)" } },
+    "bls_ebs_2026": { "url": "https://www.bls.gov/news.release/ebs2.nr0.htm", "label": { "en": "Bureau of Labor Statistics, Employee Benefits in the United States, March 2026 (released September 25, 2026)" } },
+    "bls_ebs_data": { "url": "https://www.bls.gov/ebs/data.htm", "label": { "en": "Bureau of Labor Statistics, National Compensation Survey benefits database (series NB)" } },
+    "bls_api": { "url": "https://www.bls.gov/developers/", "label": { "en": "Bureau of Labor Statistics, Public Data API, used to read the NB series" } },
+    "opm_fegli": { "url": "https://www.opm.gov/healthcare-insurance/life-insurance/reference-materials/feglihandbook.pdf", "label": { "en": "U.S. Office of Personnel Management, FEGLI Handbook: accidental death and dismemberment" } }
+  }
+}

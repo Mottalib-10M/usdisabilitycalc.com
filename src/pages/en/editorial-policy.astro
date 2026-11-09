@@ -1,0 +1,21 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { route } from '../../i18n/routes';
+import { AUTHOR_NAME } from '../../data/site-config';
+const lang = 'en';
+---
+<PageLayout title="Editorial policy of US Disability Calc: IRS rules and BLS data" description="How US Disability Calc writes its pages: rules read in IRS documents and the tax code, plan data from the BLS survey, each cited with its date, and no price without a source." lang={lang} noindex={true} breadcrumbs={[{ label: 'Editorial policy' }]} showAuthor={false}>
+  <article class="prose prose-slate max-w-none prose-headings:font-serif">
+    <h1>Editorial policy</h1>
+    <h2>Where the figures come from</h2>
+    <p>A tax rule or a limit enters the site only when it was read in an IRS revenue procedure or publication, in the Internal Revenue Code or in an Office of Personnel Management handbook. Plan benchmarks come only from the Bureau of Labor Statistics. Each figure is stored with the address of the document and the date it was read. Insurer pages, broker pages and other calculators are read to see what readers ask, never to take a number.</p>
+    <h2>How pages are written</h2>
+    <p>No amount is typed into the text. The rules live in two data files, and every page computes its figures from them when the site is built, with the same engine as the calculators. A figure we could not read at its source is not shown: there are no premium prices on the site, and the Social Security amount is always a figure you enter.</p>
+    <h2>What we do not write about</h2>
+    <p>Medical conditions, care decisions and claim strategy. The pages deal with contracts, their definitions, tax and money.</p>
+    <h2>Money</h2>
+    <p>{AUTHOR_NAME} receives nothing from insurers, brokers, law firms or lead buyers and links to none of them as a sponsor. There is no advertising today; if some is added it will be labeled and never placed above a calculator.</p>
+    <h2>Updates and corrections</h2>
+    <p>Nothing on the site updates by itself. Each page shows the date its sources were last read; when the IRS publishes the figures of a new year, the pages keep the 2026 figures until they are reread, and the date tells you which year you are looking at. A reported error is checked against the official document and, once fixed, moves that date. Write through the <a href={route('contact', lang)}>contact page</a>; the rules are on the <a href={route('method', lang)}>method page</a>.</p>
+  </article>
+</PageLayout>

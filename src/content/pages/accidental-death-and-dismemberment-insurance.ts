@@ -1,0 +1,39 @@
+import { definePage } from '../../lib/page-types';
+import { KIT as K } from '../../lib/kit';
+
+const BIA = 42000, FACE = 100000;
+const one = K.add(BIA, ['one']), three = K.add(BIA, ['one', 'two']), after = K.add(BIA, ['one', 'death']);
+const f1 = K.add(FACE, ['one']), f2 = K.add(FACE, ['two']), fd = K.add(FACE, ['death']);
+const civLife = K.GROUPS.length;
+
+export default definePage({
+  id: 'accidental-death-and-dismemberment-insurance', group: 'accident', order: 301, slug: 'accidental-death-and-dismemberment-insurance',
+  nav: 'AD&D insurance payout', card: 'What an AD&D policy pays for a death or a loss, on the schedule published by OPM for federal employees, and why it is tax-free.',
+  title: 'AD&D Insurance Payout 2026: Schedule and Tax, Worked Out',
+  description: 'AD&D insurance payout in 2026: what accidental death and dismemberment coverage pays for each loss on the federal schedule, the cap per accident, and the tax.',
+  h1: 'Accidental death and dismemberment insurance: what it pays',
+  intro: 'Enter the principal sum of your AD&D coverage and choose what the accident caused. The payment on the schedule of the federal employees’ plan appears at once.',
+  resume: `Accidental death and dismemberment insurance pays a fixed sum when an accident causes death or a loss listed in the policy, such as a hand, a foot or the sight of an eye. It pays nothing for death from illness. The amounts follow a schedule expressed as shares of the principal sum. Under the Federal Employees' Group Life Insurance program, as the Office of Personnel Management publishes it, death pays the full amount, the loss of one hand, one foot or the sight of one eye pays half, two or more such losses pay the full amount, and one accident never pays more than the full amount. In the OPM example, an employee with ${K.usd(BIA)} of basic insurance who loses an arm receives ${K.usd(one)}, then ${K.usd(three - one)} more when sight in both eyes is lost from the same accident, ${K.usd(three)} in all, and no accidental death benefit when she dies of that accident. Private policies print their own schedule. Dismemberment payments are excluded from income even when an employer pays the premium (IRS Publication 525).`,
+  faqs: [
+    { q: 'How much does AD&D pay for the loss of a hand or a foot?', a: `On the federal employees' schedule, half the principal sum for one hand, one foot or the sight of one eye, and the full sum for two or more of these in the same accident. On ${K.usd(FACE)} of coverage, that is ${K.usd(f1)} for one loss and ${K.usd(f2)} for two. Private policies use their own schedule, often with more lines such as fingers or speech; read yours.` },
+    { q: 'Does AD&D pay if death is caused by an illness?', a: 'No. AD&D covers death or loss resulting from an accident, as the policy defines it, usually within a set number of days of the accident. Death from an illness, and often losses linked to an illness, are excluded. Life insurance pays for death from any cause; AD&D adds a sum on top for accidents only.' },
+    { q: 'Can one accident pay both the dismemberment and the death benefit?', a: `Only up to the cap. On the federal schedule, the total for a single accident cannot exceed the principal sum. In the OPM example, ${K.usd(three)} of dismemberment benefits had already been paid on a ${K.usd(BIA)} amount, so no accidental death benefit followed: one loss and a later death from the same accident pay ${K.usd(after)} together.` },
+    { q: 'Are AD&D benefits taxable?', a: `Generally not. Death benefits are excluded from the beneficiary's income like life insurance proceeds (section 101 of the Internal Revenue Code). Payments for a permanent loss or loss of use of a part of the body are excluded too, IRS Publication 525 says, even if the employer pays for the plan, as long as they depend on the injury and not on time off work. A ${K.usd(fd)} payment stays whole.` },
+  ],
+  body: (h) => `
+<h2>A schedule, not a measure of need</h2>
+<p>An AD&D policy pays a sum fixed in advance, the principal sum, or a share of it, when an accident causes one of the losses listed in its schedule. It does not look at your income, your expenses or how long you are away from work. That makes it simple to read and easy to misjudge: the schedule decides everything, and an event not on it pays nothing. Group life insurance at work often includes AD&D at the same amount as the life benefit, and voluntary AD&D can be bought on top.</p>
+<p>The calculator uses the schedule that the federal government publishes for its own employees, because it is the one public schedule that can be read in full and cited (${h.src('opm_fegli', 'OPM, FEGLI Handbook')}). Private policies follow the same logic with their own lines and percentages.</p>
+${h.table(['Loss from one accident', 'Share of the principal sum', `On ${K.usd(FACE)}`], [['Death', K.pct(K.ADD.death), K.usd(fd)], ['One hand, one foot or the sight of one eye', K.pct(K.ADD.oneLoss), K.usd(f1)], ['Two or more of these', K.pct(K.ADD.twoOrMore), K.usd(f2)], ['Most for a single accident', K.pct(K.ADD.capPerAccident), K.usd(FACE * K.ADD.capPerAccident)]], 'Accidental death and dismemberment under FEGLI Basic insurance, as published by the Office of Personnel Management.', ['l', 'r', 'r'])}
+<h2>The OPM example, step by step</h2>
+<p>The FEGLI handbook gives a worked case. Ileana, 46, has Basic coverage with a basic insurance amount of ${K.usd(BIA)}. She loses an arm in a climbing accident and receives ${K.usd(one)}, half the amount. Six months later she loses the sight of both eyes from the same accident and receives another ${K.usd(three - one)}: the total, ${K.usd(three)}, equals her basic amount, even though she has suffered three losses. When she dies two weeks later from injuries of that accident, the regular life insurance death benefit of ${K.usd(BIA)} is paid, but no accidental death benefit, because any further payment for that accident would exceed the cap. The calculator reproduces the case: choose one loss, then death from the same accident.</p>
+${h.mini('add', { t: 'Your AD&D payment', p: ['face', 'loss'], d: { face: BIA, loss: 'onethendeath' } })}
+<h2>Tax on the payment</h2>
+<p>A death benefit paid to a beneficiary is excluded from income under ${h.src('usc_101', 'section 101')}. A dismemberment payment is excluded under ${h.src('usc_105', 'section 105(c)')}: ${h.src('irs_p525', 'IRS Publication 525')} lists compensation for permanent loss or loss of use of a part or function of the body among benefits that are not taxable even if the employer pays for the plan, provided the payment is based on the injury and not on the time you are absent from work. The premium itself is a different matter: AD&D coverage paid by an employer is generally not taxable to the employee, while coverage you buy is paid with after-tax money.</p>
+<h2>What to check in your policy</h2>
+<p>Read the definition of accident and the time limit: losses usually have to occur within a stated number of days of the accident. Read the schedule line by line, including partial losses such as fingers, speech or hearing, and the exclusions, often listed as acts of war, self-inflicted injury, intoxication or certain sports. Check whether the coverage ends when you leave the employer, and whether it can be converted. The ${h.a('accident-insurance', 'accident insurance page')} covers policies that pay smaller sums for injuries and their care, and the ${h.a('hybrid-long-term-care-insurance', 'hybrid page')} life policies that also pay for care. The Bureau of Labor Statistics survey used across this site covers ${K.num(civLife)} groups of workers for disability and long-term care, not AD&D, so no access figure is shown here.</p>
+`,
+  tool: 'add',
+  related: ['accident-insurance', 'critical-illness-insurance', 'hospital-indemnity-insurance', 'hybrid-long-term-care-insurance'],
+  sources: ['opm_fegli', 'irs_p525', 'usc_101', 'usc_105'],
+});

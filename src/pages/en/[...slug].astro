@@ -1,0 +1,10 @@
+---
+/** Every content page (src/content/pages). */
+import ContentPage from '../../components/ContentPage.astro';
+import { PAGES } from '../../lib/pages';
+export function getStaticPaths() {
+  return PAGES.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+const { page } = Astro.props;
+---
+<ContentPage page={page} />

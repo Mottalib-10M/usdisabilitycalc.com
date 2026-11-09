@@ -1,0 +1,55 @@
+---
+/**
+ * Home (the pillar): the calculator first (salary, who pays, plan formula), then the folded answer, the BLS table of
+ * access by employer, the prose, and the pages by topic. Text: src/content/home.ts. Generated blocks carry data-chrome.
+ */
+import PageLayout from '../layouts/PageLayout.astro';
+import Clamp from './Clamp.astro';
+import Tool from './Tool.astro';
+import Body from './Body.astro';
+import { HOME, VALUE } from '../content/home';
+import { route } from '../i18n/routes';
+import { GROUPS } from '../i18n/nav';
+import { helpers, SOURCES, table } from '../lib/helpers';
+import { PAGES } from '../lib/pages';
+import { KIT as K } from '../lib/kit';
+import { faqSchema, organizationSchema, websiteSchema, webPageSchema, webApplicationSchema } from '../lib/seo';
+import { LAST_UPDATED } from '../data/site-config';
+const lang = 'en';
+const x = HOME;
+const path = route('home', lang);
+const h = helpers();
+const sources = x.sources.map((k) => ({ name: SOURCES[k].label, url: SOURCES[k].url }));
+const jsonLd = [websiteSchema(lang), organizationSchema(lang), webPageSchema({ name: x.h1, description: x.description, path, lang }), webApplicationSchema({ name: x.h1, description: x.description, path, lang }), faqSchema(x.faqs, lang)];
+const pick = ['All civilian workers', 'Private industry', 'State and local government', 'Fewer than 50 workers', '500 workers or more', 'Full-time workers', 'Part-time workers', 'Lowest-paid quarter of private workers', 'Highest-paid quarter of private workers', 'Information', 'Health care and social assistance', 'Retail trade', 'Accommodation and food services'];
+const blsRows = pick.map((l) => { const g = K.G(l); return [l, K.bp(g.std), K.bp(g.ltd), K.bp(g.ltc)]; });
+---
+<PageLayout title={x.title} description={x.description} lang={lang} jsonLd={jsonLd} faqs={x.faqs} sources={sources} faqOuverte={0}>
+  <header class="mb-4">
+    <h1 class="font-serif text-[1.75rem] font-bold text-navy-900 max-sm:leading-tight sm:text-3xl md:text-4xl">{x.h1}</h1>
+    <p class="mt-2 text-base text-navy-700 sm:text-lg">{x.intro}</p>
+    <p class="mt-2 text-sm font-medium text-navy-700">Independent site: not an insurer or a broker. No quote, no policy sold, no contact details asked.</p>
+  </header>
+  <div data-outil data-chrome><Tool kind="all" idPrefix="home" /></div>
+  <p class="mt-3 text-sm text-navy-600">2026 federal tax rules · BLS plan data of March 2026 · <a href={route('method', lang)} class="underline">How the figures are built</a> · <a href={route('about', lang)} class="underline">Who publishes this</a> · updated <time datetime={LAST_UPDATED}>{K.day(LAST_UPDATED)}</time></p>
+  <p class="mt-3 text-navy-800">{VALUE}</p>
+  <Clamp text={x.resume} lang={lang} id="clamp-home" class="my-8" />
+  <section data-chrome class="mt-8">
+    <h2 class="font-serif text-2xl font-bold text-navy-900">Who is offered disability coverage at work</h2>
+    <Fragment set:html={table(['Workers', 'Short-term disability', 'Long-term disability', 'Long-term care'], blsRows, `Share of workers with access to each plan, March 2026. Bureau of Labor Statistics, National Compensation Survey, published September 25, 2026; read ${K.day(K.RETRIEVED)}. Industries, sizes, hours and wage groups are private industry.`, ['l', 'r', 'r', 'r'])} />
+  </section>
+  <section class="mt-8"><Body html={x.why(h)} path={path} /></section>
+  <section data-chrome class="mt-10">
+    <h2 class="font-serif text-2xl font-bold text-navy-900">Every calculator by topic</h2>
+    <div class="mt-4 grid gap-6 sm:grid-cols-3">
+      {GROUPS.map((g) => (
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-wide text-navy-600">{g.label}</p>
+          <ul class="mt-2 space-y-2 text-sm">
+            {PAGES.filter((p) => p.group === g.id).map((p) => <li><a href={route(p.id, lang)} class="font-medium text-accent-700 underline-offset-2 hover:underline">{p.nav}</a></li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</PageLayout>
