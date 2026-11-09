@@ -25,7 +25,7 @@ export const VALUE = `Insurers quote a gross benefit and a premium, and stop the
 export const HOME = {
   title: 'Disability Insurance After Tax 2026: Benefit Calculator',
   description: 'Disability insurance after tax in 2026: what a short-term or long-term benefit pays a month after the Social Security offset and federal tax, by premium payer.',
-  h1: 'Disability insurance: what the benefit really pays you',
+  h1: 'Disability insurance after tax: what the benefit really pays you',
   /** The answer in one sentence, before the calculator (brief of 2026-11-09). */
   /** Testers 2026-11-09 (second pass): "60% … 67%" read as a contradiction, and no figure on the first screen. One
    *  amount per notion, each named: the plan check before tax, the tax, what is left, the pay it replaces. */
@@ -55,7 +55,7 @@ export const HOME = {
 <p>If Social Security also pays you a disability check, the plan subtracts it from its own check: that subtraction is called the offset. A group long-term plan lists in its contract the other disability income it subtracts from its benefit: Social Security disability, family benefits paid on your record, workers' compensation, a state disability program, sometimes a pension. With a ${K.usd(emp.gross)} monthly benefit and a Social Security award of ${K.usd(SSDI)}, the plan pays ${K.usd(off.net)}, and your total income stays near ${K.usd(off.net + SSDI)} before tax. A contract can require you to apply for Social Security and may estimate the award before it arrives. When the award is paid for past months, the plan asks back what it paid in the meantime.</p>
 <p>The offset also decides how the benefit moves with time. A contract that keeps subtracting only the first award amount (a frozen offset) lets later Social Security raises stay with you; a contract that subtracts each raise keeps your total flat for years. The ${h.a('ltd-social-security-offset', 'offset calculator')} compares both clauses. Social Security benefits have their own tax rule: under the ${h.src('irs_p915', 'IRS worksheet for Social Security')}, up to 50% and then up to 85% of them become taxable once other income passes ${K.usd(K.FED.socialSecurityBenefitBase.single)} for a single filer.</p>
 ${h.mini('offset', { t: 'Plan check after a Social Security award', p: ['gross', 'ssdi'], d: { gross: emp.gross, ssdi: SSDI } })}
-<h2>Who pays the premium decides the tax</h2>
+<h2>Who pays the premium decides the tax on disability insurance</h2>
 <p>Tax is what most quotes leave out. ${h.src('irs_p525', 'IRS Publication 525')} taxes a disability benefit when the employer paid the premium, and also when you paid it through a pre-tax payroll deduction, because a premium that never entered your taxable income counts as paid by the employer. A benefit bought with after-tax money is not income at all. Two coworkers with the same plan and the same salary can therefore receive the same check and keep different amounts. The ${h.a('is-disability-insurance-taxable', 'tax page')} works through each arrangement, including a plan whose cost is shared.</p>
 <p>That is why ${K.usd(emp.inHand)} a month above and the ${K.usd(Math.round(emp.inHand * 12))} of twelve checks are not the whole story: the first ${K.num(emp.ficaMonths)} checks also lose payroll tax, so twelve checks leave a little less than twelve times ${K.usd(emp.inHand)}.</p>
 ${h.mini('tax', { t: 'Twelve monthly checks after tax, by who pays for the insurance', p: ['ben', 'payer'], d: { ben: emp.net } })}

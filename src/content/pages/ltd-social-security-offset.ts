@@ -24,7 +24,7 @@ export default definePage({
     { q: 'Are LTD benefits and Social Security taxed the same way?', a: `No. The plan benefit is taxable or not depending on who paid the premium (IRS Publication 525). Social Security disability is partly taxable once your income passes a base amount (Publication 915). At ${K.usd(100000)} of salary, a ${K.usd(G)} capped benefit and a ${K.usd(SS)} award, an employer-paid plan leaves about ${K.usd(t.inHand)} a month from both after federal income tax.` },
   ],
   body: (h) => `
-<h2>How the offset works</h2>
+<h2>How the Social Security offset works</h2>
 <p>A group long-term disability plan promises a share of your earnings, and counts what other programs pay toward that share. The clause, usually titled other income benefits or deductible sources of income, lists them: Social Security disability benefits paid to you, benefits paid to your dependents because of your disability, workers' compensation, state disability benefits, some pensions, and earnings if you work. The plan pays the difference between its gross benefit and their total, but not less than its minimum benefit, a fixed amount or a percentage stated in the contract.</p>
 <p>Social Security itself is not reproduced here: whether you qualify and how much the award is are decisions of the Social Security Administration, and the amount you enter is the one on your award letter or statement. The calculator applies the plan side of the arithmetic.</p>
 ${h.mini('offset', { t: 'Your plan check after the award', p: ['gross', 'ssdi'] })}

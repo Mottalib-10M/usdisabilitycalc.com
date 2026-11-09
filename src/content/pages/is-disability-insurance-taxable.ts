@@ -16,7 +16,7 @@ export default definePage({
   nav: 'Is disability insurance taxable?', card: 'Taxable or tax-free: the IRS rule for employer-paid, pre-tax, after-tax and shared premiums, with the tax on your benefit.',
   title: 'Disability Benefits Tax 2026: Taxable or Tax-Free by Payer',
   description: 'Disability benefits tax in 2026: employer-paid and pre-tax premiums make the benefit taxable, after-tax premiums make it tax-free. See the tax on your check.',
-  h1: 'Is disability insurance taxable? It depends on who paid the premium',
+  h1: 'Is disability insurance taxable? The tax depends on who paid the premium',
   intro: 'Enter the monthly benefit, the number of checks paid this year and who pays for the insurance (the premium). What you keep after federal income tax and payroll tax (Social Security and Medicare), and the same benefit under each other way of paying, appear at once.',
   resume: `Disability benefits are taxable income when your employer paid the premium, and also when you paid it through a pre-tax payroll deduction, because the IRS treats a premium excluded from your wages as paid by the employer. They are tax-free when you paid the premium with after-tax money, including an individual policy you bought yourself (IRS Publication 525). When the cost is shared, only the part of the benefit that matches the employer's share of the premium over the three previous policy years is taxed: in the IRS example, an employer paying 70% makes ${K.usd(1400)} of each ${K.usd(2000)} check taxable. Employer-funded benefits also carry Social Security and Medicare for the first six calendar months after the last month worked. A ${K.usd(BEN)} monthly benefit paid all year, employer-funded, adds about ${K.usd(fedEmp)} of federal income tax for a single filer with no other income in 2026; after a ${K.EX.elimDays}-day wait, its first ${K.num(ficaChecks)} checks also lose ${K.usd(ficaEmp)} in all to Social Security and Medicare.`,
   faqs: [
@@ -27,7 +27,7 @@ export default definePage({
     { q: 'Is a disability benefit from a policy I bought myself reported on my return?', a: 'No. If you paid the entire cost of an accident or health plan, IRS Publication 525 says not to include the amounts you receive for personal injury or sickness in income. This covers individual disability income policies bought with after-tax money. A business that pays the premium for its owner, or deducts it, changes the answer, so check how the premium was paid.' },
   ],
   body: (h) => `
-<h2>The rule in one sentence</h2>
+<h2>The disability benefit tax rule in one sentence</h2>
 <p>The tax rule for a disability benefit follows the tax rule for the premium. A premium paid with money that was taxed gives a tax-free benefit; a premium that escaped tax, because the employer paid it or because it was deducted before tax, gives a taxable benefit. The rule comes from ${h.src('usc_105', 'the tax code itself')} and is explained by the IRS in ${h.src('irs_p525', 'its guide to taxable income')}, under sickness and injury benefits. It does not depend on the insurer, on the length of the claim or on whether the plan is called short-term or long-term.</p>
 <p>The table under the calculator applies the rule to the five arrangements found in practice: an employer-paid group plan, a group plan paid by pre-tax deduction, a group plan paid after tax, a plan whose cost is shared, and an individual policy. Enter your own benefit and income and the tax changes with them; the ranking between arrangements does not.</p>
 <h2>Pre-tax deductions: the trap</h2>
