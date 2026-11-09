@@ -59,6 +59,7 @@
     "bls_ebs_2026": { "url": "https://www.bls.gov/news.release/ebs2.nr0.htm", "label": { "en": "Bureau of Labor Statistics, Employee Benefits in the United States, March 2026 (released September 25, 2026)" } },
     "bls_ebs_data": { "url": "https://www.bls.gov/ebs/data.htm", "label": { "en": "Bureau of Labor Statistics, National Compensation Survey benefits database (series NB)" } },
     "bls_api": { "url": "https://www.bls.gov/developers/", "label": { "en": "Bureau of Labor Statistics, Public Data API, used to read the NB series" } },
+    "census_divisions": { "url": "https://www2.census.gov/geo/docs/maps-data/maps/reg_div.txt", "label": { "en": "U.S. Census Bureau, Census Regions and Divisions with State FIPS Codes (states of each census division, read November 9, 2026)" } },
     "opm_fegli": { "url": "https://www.opm.gov/healthcare-insurance/life-insurance/reference-materials/feglihandbook.pdf", "label": { "en": "U.S. Office of Personnel Management, FEGLI Handbook: accidental death and dismemberment" } }
   }
 }

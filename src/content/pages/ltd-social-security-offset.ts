@@ -11,11 +11,11 @@ const t = K.ltd(b);
 
 export default definePage({
   id: 'ltd-social-security-offset', group: 'disability', order: 108, slug: 'ltd-social-security-offset',
-  nav: 'Social Security offset', card: 'How a Social Security disability award reduces a long-term disability check, now and after cost-of-living raises.',
+  nav: 'Social Security cut to the check', card: 'How a Social Security disability award reduces a long-term disability check, now and after cost-of-living raises.',
   title: 'LTD Social Security Offset 2026: Your Check After the Award',
   description: 'LTD Social Security offset in 2026: how an SSDI award and family benefits cut a long-term disability check, the plan minimum, and a frozen offset over time.',
   h1: 'The Social Security offset: why your long-term disability check shrinks',
-  intro: 'Enter the plan benefit before offsets and the Social Security award, with any family benefits. The calculator shows the plan check now and what both pay together later.',
+  intro: 'Enter the plan benefit before offsets (the other income the plan takes off its check) and the Social Security award, with any family benefits. The calculator shows the plan check now and what both pay together later.',
   resume: `Group long-term disability plans list Social Security disability among the other income they subtract from their benefit. If the plan pays ${K.usd(G)} a month before offsets and Social Security awards ${K.usd(SS)}, the plan check falls to ${K.usd(a.ltdNow)} and the total stays at ${K.usd(a.totalNow)} before tax. Benefits paid to your children or spouse on your record are often subtracted too: with ${K.usd(FAM)} of family benefits, the plan pays ${K.usd(fam.ltdNow)}, or its minimum if the contract has one. The offset clause decides what happens next. When the offset is frozen at the first award, later cost-of-living raises stay with you: with a 2% raise each year, the total grows to ${K.usd(a.totalLater)} after ten years. When the plan subtracts each raise, the total stays at ${K.usd(f.totalLater)}. An award paid late comes with back pay for past months, and the plan recovers what it overpaid in the meantime. Both benefits have their own tax rules.`,
   faqs: [
     { q: 'Why does my long-term disability plan want me to apply for Social Security?', a: 'Because the plan subtracts Social Security disability from its benefit, so an award lowers what the insurer pays. Many contracts require you to apply, and to appeal a denial, as a condition of benefits, and some reduce your check by an estimated award if you do not. The insurer may offer help with the application for the same reason.' },

@@ -1,0 +1,13 @@
+---
+/**
+ * A section folded under its title (brief of 2026-11-09: shorter pages on a phone). The title is the H2 of the
+ * section, inside <summary> (styles .fold in global.css); the text stays in the HTML served, one tap away, so nothing
+ * is lost for search engines.
+ */
+interface Props { title: string; id?: string; class?: string; open?: boolean }
+const { title, id, class: cls = '', open = false } = Astro.props;
+---
+<details id={id} open={open} class={`fold mt-2 ${cls}`}>
+  <summary><h2 class="fold-h">{title}</h2></summary>
+  <div class="pb-4"><slot /></div>
+</details>

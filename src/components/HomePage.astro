@@ -1,12 +1,16 @@
 ---
 /**
- * Home (the pillar): the calculator first (salary, who pays, plan formula), then the folded answer, the BLS table of
- * access by employer, the prose, and the pages by topic. Text: src/content/home.ts. Generated blocks carry data-chrome.
+ * Home (the pillar), ordered for a hurried reader on a phone (brief of 2026-11-09): the question, the answer in one
+ * sentence, three questions for a reader who does not know where to start, the calculator already filled in, what to
+ * copy from the plan papers, the cited summary, then the disability sections in the order a claim happens. Plan data,
+ * cost, long-term care and accident policies are folded under their titles (text kept in the HTML).
+ * Text: src/content/home.ts. Generated blocks carry data-chrome.
  */
 import PageLayout from '../layouts/PageLayout.astro';
 import Clamp from './Clamp.astro';
 import Tool from './Tool.astro';
 import Body from './Body.astro';
+import Fold from './Fold.astro';
 import { HOME, VALUE } from '../content/home';
 import { route } from '../i18n/routes';
 import { GROUPS } from '../i18n/nav';
@@ -23,33 +27,50 @@ const sources = x.sources.map((k) => ({ name: SOURCES[k].label, url: SOURCES[k].
 const jsonLd = [websiteSchema(lang), organizationSchema(lang), webPageSchema({ name: x.h1, description: x.description, path, lang }), webApplicationSchema({ name: x.h1, description: x.description, path, lang }), faqSchema(x.faqs, lang)];
 const pick = ['All civilian workers', 'Private industry', 'State and local government', 'Fewer than 50 workers', '500 workers or more', 'Full-time workers', 'Part-time workers', 'Lowest-paid quarter of private workers', 'Highest-paid quarter of private workers', 'Information', 'Health care and social assistance', 'Retail trade', 'Accommodation and food services'];
 const blsRows = pick.map((l) => { const g = K.G(l); return [l, K.bp(g.std), K.bp(g.ltd), K.bp(g.ltc)]; });
+const cap = K.PRIV.ltd_max_monthly_p50!, pctPlan = K.PRIV.ltd_median_pct!;
+const linkCls = 'font-medium text-accent-700 underline underline-offset-2';
 ---
 <PageLayout title={x.title} description={x.description} lang={lang} jsonLd={jsonLd} faqs={x.faqs} sources={sources} faqOuverte={0}>
-  <header class="mb-4">
+  <header class="mb-3">
     <h1 class="font-serif text-[1.75rem] font-bold text-navy-900 max-sm:leading-tight sm:text-3xl md:text-4xl">{x.h1}</h1>
-    <p class="mt-2 text-base text-navy-700 sm:text-lg">{x.intro}</p>
+    <p class="mt-2 text-base font-medium text-navy-900 sm:text-lg">{x.answer}</p>
+    <p class="mt-2 text-base text-navy-700">{x.intro}</p>
     <p class="mt-2 text-sm font-medium text-navy-700">Independent site: not an insurer or a broker. No quote, no policy sold, no contact details asked.</p>
   </header>
-  <div data-outil data-chrome><Tool kind="all" idPrefix="home" /></div>
+  <details id="start" data-chrome class="mb-4 rounded-lg border border-navy-200 bg-navy-50 px-4 py-2">
+    <summary class="cursor-pointer py-1 text-sm font-semibold text-accent-700">Not sure where to start? Three questions</summary>
+    <ol class="mt-2 list-decimal space-y-2 pl-5 pb-2 text-sm text-navy-800">
+      <li><strong>What do you earn?</strong> Type your yearly pay before tax in the first box.</li>
+      <li><strong>Who pays for the coverage?</strong> Look at your pay stub. No disability line: pick “My employer”. A disability line among the pre-tax deductions: pick the pre-tax option. A line taken after tax: the after-tax option. A policy you bought yourself: the last option.</li>
+      <li><strong>Do you have your plan summary?</strong> No: keep {pctPlan}% and {K.usd(cap)}, the most common plan. Yes: copy its share of pay and its monthly maximum.</li>
+    </ol>
+    <p class="pb-2 text-sm text-navy-700">Off work for a few weeks? <a href={route('short-term-disability-insurance', lang)} class={linkCls}>Short-term disability calculator</a>. Asked “pre-tax or after-tax?” at enrollment? <a href={route('pre-tax-vs-after-tax-disability-premiums', lang)} class={linkCls}>The election, compared</a>. No plan at work? <a href={route('how-much-disability-insurance-do-i-need', lang)} class={linkCls}>How much coverage you need</a>.</p>
+  </details>
+  <div id="calculator" data-outil data-chrome class="scroll-mt-20"><Tool kind="all" idPrefix="home" /></div>
   <p class="mt-3 text-sm text-navy-600">2026 federal tax rules · BLS plan data of March 2026 · <a href={route('method', lang)} class="underline">How the figures are built</a> · <a href={route('about', lang)} class="underline">Who publishes this</a> · updated <time datetime={LAST_UPDATED}>{K.day(LAST_UPDATED)}</time></p>
-  <p class="mt-3 text-navy-800">{VALUE}</p>
-  <Clamp text={x.resume} lang={lang} id="clamp-home" class="my-8" />
-  <section data-chrome class="mt-8">
-    <h2 class="font-serif text-2xl font-bold text-navy-900">Who is offered disability coverage at work</h2>
-    <Fragment set:html={table(['Workers', 'Short-term disability', 'Long-term disability', 'Long-term care'], blsRows, `Share of workers with access to each plan, March 2026. Bureau of Labor Statistics, National Compensation Survey, published September 25, 2026; read ${K.day(K.RETRIEVED)}. Industries, sizes, hours and wage groups are private industry.`, ['l', 'r', 'r', 'r'])} />
-  </section>
-  <section class="mt-8"><Body html={x.why(h)} path={path} /></section>
-  <section data-chrome class="mt-10">
-    <h2 class="font-serif text-2xl font-bold text-navy-900">Every calculator by topic</h2>
-    <div class="mt-4 grid gap-6 sm:grid-cols-3">
-      {GROUPS.map((g) => (
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-wide text-navy-600">{g.label}</p>
-          <ul class="mt-2 space-y-2 text-sm">
-            {PAGES.filter((p) => p.group === g.id).map((p) => <li><a href={route(p.id, lang)} class="font-medium text-accent-700 underline-offset-2 hover:underline">{p.nav}</a></li>)}
-          </ul>
+  <section class="mt-6"><Body html={x.start(h)} path={path} /></section>
+  <Clamp text={x.resume} lang={lang} id="clamp-home" class="my-6" />
+  <section class="mt-6"><Body html={x.guide(h)} path={path} /></section>
+  <div class="mt-8">
+    <Fold title={x.folds[0].title} id={x.folds[0].id}>
+      <Body html={x.folds[0].html(h)} path={path} />
+      <div data-chrome><Fragment set:html={table(['Workers', 'Short-term disability', 'Long-term disability', 'Long-term care'], blsRows, `Who is offered disability coverage at work: share of workers with access to each plan, March 2026. Bureau of Labor Statistics, National Compensation Survey, published September 25, 2026; read ${K.day(K.RETRIEVED)}. Industries, sizes, hours and wage groups are private industry.`, ['l', 'r', 'r', 'r'])} /></div>
+    </Fold>
+    {x.folds.slice(1).map((f) => <Fold title={f.title} id={f.id}><Body html={f.html(h)} path={path} /></Fold>)}
+    <Fold title="Why this site exists" id="why"><p class="text-navy-800">{VALUE}</p></Fold>
+    <div data-chrome>
+      <Fold title="Every calculator by topic" id="calculators">
+        <div class="mt-2 grid gap-6 sm:grid-cols-3">
+          {GROUPS.map((g) => (
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-wide text-navy-600">{g.label}</p>
+              <ul class="mt-2 space-y-2 text-sm">
+                {PAGES.filter((p) => p.group === g.id).map((p) => <li><a href={route(p.id, lang)} class="font-medium text-accent-700 underline-offset-2 hover:underline">{p.nav}</a></li>)}
+              </ul>
+            </div>
+          ))}
         </div>
-      ))}
+      </Fold>
     </div>
-  </section>
+  </div>
 </PageLayout>

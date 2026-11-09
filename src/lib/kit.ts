@@ -6,16 +6,18 @@
  *   K.ltd({...}), K.std({...})        engine results (lib/engine/cover.ts)
  *   K.taxAdded(extra, other, st)      federal tax added by a taxable amount
  *   K.th(salary, st)                  yearly take-home pay { gross, fed, fica, net }
+ *   K.EX, K.EX_WAIT                   the one example case of the whole site (same defaults on every screen)
+ *   K.gl(label)                       BLS group label, census divisions with their states
  *   formats                           K.usd(1234.5) "$1,235", K.cents(41.5) "$41.50", K.num, K.dec, K.pct(0.6) "60%", K.day("2026-09-25")
  */
 import P from '../data/params-2026.json';
 import B from '../data/bls-ncs-2026.json';
-import { usd, pct, longDate } from './tool-specs';
+import { usd, pct, longDate, EX, EX_WAIT_MONTHS, groupLabel } from './tool-specs';
 import { formatNumber, formatDecimal, formatMoney } from './format';
 import * as E from './engine/cover';
 
 export const KIT = {
-  P, B, FED: E.FED, LTC: E.LTC, HSA: E.HSA, ADD: E.ADD, RETRIEVED: E.RETRIEVED,
+  P, B, EX, EX_WAIT: EX_WAIT_MONTHS, gl: groupLabel, ltdTotal: E.ltdTotal, FED: E.FED, LTC: E.LTC, HSA: E.HSA, ADD: E.ADD, RETRIEVED: E.RETRIEVED,
   PRIV: E.PRIVATE, CIV: E.CIVILIAN, GOV: E.GOVERNMENT, GROUPS: E.GROUPS,
   G: (label: string) => { const g = E.GROUPS.find((x) => x.label === label); if (!g) throw new Error(`BLS group ${label}`); return g; },
   ltd: E.ltd, std: E.std, taxAdded: E.taxAdded, taxOn: E.taxOn, bracketTax: E.bracketTax, th: (s: number, st: E.Status = 'single') => E.takeHome(s, st),

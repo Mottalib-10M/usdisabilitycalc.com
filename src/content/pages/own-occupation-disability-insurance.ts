@@ -7,11 +7,11 @@ const c = K.ownOcc({ benefit: 8000, age: 35, ownMonths: 60, endAge: 67 });
 
 export default definePage({
   id: 'own-occupation-disability-insurance', group: 'disability', order: 106, slug: 'own-occupation-disability-insurance',
-  nav: 'Own-occupation coverage', card: 'How much of a long claim depends on the definition of disability: own occupation, modified own occupation or any occupation.',
+  nav: 'Your job or any job (own-occupation)', card: 'How much of a long claim depends on the definition of disability: own occupation, modified own occupation or any occupation.',
   title: 'Own-Occupation Disability Insurance 2026: What It Is Worth',
   description: 'Own-occupation disability insurance in 2026: how much of a long claim depends on the definition of disability once the own-occupation period ends, in dollars.',
   h1: 'Own-occupation disability insurance: the value of the definition',
-  intro: 'Enter the monthly benefit, your age, the own-occupation period written in the contract and the age benefits end. The calculator shows how much of the claim depends on the any-occupation test.',
+  intro: 'Enter the monthly benefit, your age, the own-occupation period written in the contract (the months the plan judges you against your own job only) and the age benefits end. The calculator shows how much of the claim depends on the any-occupation test.',
   resume: `The definition of disability decides whether a long-term policy keeps paying. Under an own-occupation definition, you are disabled if you cannot do the main duties of your own job, even if you could work in another one. Under an any-occupation definition, you are disabled only if you cannot do any job for which your education, training and experience fit you. Many group plans use own occupation for an initial period, often stated in months, then switch to any occupation. For a ${K.usd(5000)} monthly benefit from age 40 to 65 with a 24-month own-occupation period, ${K.usd(a.difference)} of the ${K.usd(a.totalOwn)} total, ${K.pct(a.difference / a.totalOwn)} of the claim, depends on the any-occupation test. At age 55 the share falls to ${K.pct(b.difference / b.totalOwn)}. Individual policies can extend own occupation to the end of the benefit period; a modified version pays only if you do not work elsewhere.`,
   faqs: [
     { q: 'What does own occupation mean in a disability policy?', a: 'That you are considered disabled when you cannot perform the material and substantial duties of your regular occupation, the one you held when the disability began. A true own-occupation contract pays even if you take another job. Read the definitions section of the policy: the words "your occupation", "any gainful occupation" and the time limits attached to them decide everything.' },

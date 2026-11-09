@@ -8,7 +8,7 @@ const civLife = K.GROUPS.length;
 
 export default definePage({
   id: 'accidental-death-and-dismemberment-insurance', group: 'accident', order: 301, slug: 'accidental-death-and-dismemberment-insurance',
-  nav: 'AD&D insurance payout', card: 'What an AD&D policy pays for a death or a loss, on the schedule published by OPM for federal employees, and why it is tax-free.',
+  nav: 'Accidental death (AD&D) payout', card: 'What an AD&D policy pays for a death or a loss, on the schedule published by OPM for federal employees, and why it is tax-free.',
   title: 'AD&D Insurance Payout 2026: Schedule and Tax, Worked Out',
   description: 'AD&D insurance payout in 2026: what accidental death and dismemberment coverage pays for each loss on the federal schedule, the cap per accident, and the tax.',
   h1: 'Accidental death and dismemberment insurance: what it pays',

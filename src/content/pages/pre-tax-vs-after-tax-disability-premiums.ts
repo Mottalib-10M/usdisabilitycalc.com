@@ -1,10 +1,11 @@
 import { definePage } from '../../lib/page-types';
 import { KIT as K } from '../../lib/kit';
 
-const SAL = 70000, PREM = 360, BEN = 3500;
-const a = K.premiumChoice({ salary: SAL, premium: PREM, benefit: BEN, months: 12, st: 'single' });
-const longer = K.premiumChoice({ salary: SAL, premium: PREM, benefit: BEN, months: 60, st: 'single' });
-const hi = K.premiumChoice({ salary: 220000, premium: 900, benefit: 10000, months: 12, st: 'single' });
+// Same figures as the calculator above (K.EX for the salary and the 90-day wait).
+const SAL = K.EX.sal, PREM = 300, BEN = 3000, W = K.EX_WAIT;
+const a = K.premiumChoice({ salary: SAL, premium: PREM, benefit: BEN, months: 12, st: 'single', waitMonths: W });
+const longer = K.premiumChoice({ salary: SAL, premium: PREM, benefit: BEN, months: 60, st: 'single', waitMonths: W });
+const hi = K.premiumChoice({ salary: 220000, premium: 900, benefit: 10000, months: 12, st: 'single', waitMonths: W });
 const yearsWorked = 30;
 
 export default definePage({
@@ -26,9 +27,9 @@ export default definePage({
 <p>A pre-tax deduction takes the premium out of your pay before federal income tax and, under a cafeteria plan, before Social Security and Medicare. Your taxable wages fall by the premium, and the tax on them falls by the premium times your marginal rate plus ${K.pct(K.FED.socialSecurityRate + K.FED.medicareRate, 2)} of payroll tax below the wage base. In exchange, the IRS considers that the employer paid the premium: ${h.src('irs_p525', 'Publication 525')} says that when the premium of a plan under a cafeteria plan was not included in your income, you are not considered to have paid it and the benefits are income. ${h.src('irs_p15a', 'Publication 15-A')} adds that such pre-tax contributions are employer contributions, so the benefit is also sick pay subject to payroll tax in its first months.</p>
 <p>An after-tax deduction leaves your taxable wages unchanged. The premium costs you its full amount, and the benefit is not income. Nothing else differs: same insurer, same formula, same maximum.</p>
 <h2>The arithmetic of the choice</h2>
-<p>The calculator above computes both sides. The yearly saving is the premium times your marginal federal rate for 2026 (${h.src('irs_rp_2025_32', 'Revenue Procedure 2025-32')}) plus payroll tax. The cost of a claim is the federal income tax on the benefits received, assumed to be your only income that year, plus Social Security and Medicare for the first six months. Dividing one by the other gives the number of years of saving that one claim of the length you enter would erase.</p>
+<p>The calculator above computes both sides. The yearly saving is the premium times your marginal federal rate for 2026 (${h.src('irs_rp_2025_32', 'Revenue Procedure 2025-32')}) plus payroll tax. The cost of a claim is the federal income tax on the benefits received, assumed to be your only income that year, plus Social Security and Medicare on the checks paid within six months of your last month of work, the first ${K.num(K.FED.sickPayFicaMonths - W)} after a ${K.EX.elimDays}-day wait. Dividing one by the other gives the number of years of saving that one claim of the length you enter would erase.</p>
 <p>The result is rarely close. In the example of the summary, the ratio is ${K.dec(a.yearsCovered, 0)} years for a one-year claim. The reason is structural: the premium for group disability coverage is a small fraction of the benefit it buys, so a tax rate on the premium can never match a similar tax rate on the benefit unless the probability of a claim is very small. The calculator assumes no other income in the claim year; a claim that starts late in the year, on top of most of a year of wages, is taxed at a higher rate and makes the pre-tax option worse.</p>
-${h.mini('premium', { t: 'Your own enrollment choice', p: ['prem', 'ben'], d: { sal: SAL, prem: PREM, ben: BEN } })}
+${h.mini('premium', { t: 'The same choice against a five-year claim', p: ['prem', 'mo'], d: { mo: 60 } })}
 <h2>When pre-tax can still make sense</h2>
 <p>Short-term disability with a low benefit and a short duration is the closest case: a claim lasts weeks, not years, and the tax on it is small. Someone who already holds an individual tax-free policy covering most of the risk may also accept a taxable group benefit on top. In both cases, enter the benefit and the length of claim you think plausible, and read the ratio.</p>
 <h2>Imputed income and gross-up</h2>

@@ -1,12 +1,29 @@
 ---
-/** The HTML body of a content file, with its mini-simulators rendered as islands. */
+/**
+ * The HTML body of a content file, with its mini-simulators rendered as islands.
+ * `open` (brief of 2026-11-09, shorter pages on a phone): the first `open` H2 sections stay open, each later section is
+ * folded under its own H2 in a <details> (styles .fold, global.css). The text stays in the HTML served.
+ */
 import MiniSim from './calc/MiniSim';
 import { miniHref } from '../lib/mini-targets';
-interface Props { html: string; path: string }
-const { html, path } = Astro.props;
-const parts = html.split(/<!--mini:([A-Za-z0-9_]+)(?:\|([A-Za-z0-9+/=]+))?-->/);
+import { foldSections } from '../lib/fold';
+import { pageOfTool } from '../lib/pages';
+import { label } from '../i18n/nav';
+interface Props { html: string; path: string; open?: number }
+const { html, path, open } = Astro.props;
+const parts = (open === undefined ? html : foldSections(html, open)).split(/<!--mini:([A-Za-z0-9_]+)(?:\|([A-Za-z0-9+/=]+))?-->/);
 const decode = (b?: string) => (b ? Buffer.from(b, 'base64').toString('utf8') : undefined);
+/** Where the mini's link goes, and what it says (naive testers 2026-11-09: "Open the full calculator" sat under minis
+ *  whose full calculator was already at the top of the same page, and never said where it led). */
+function link(kind: string, arg?: string) {
+  const target = miniHref(kind, path), o = arg ? JSON.parse(arg) : {};
+  const here = target === path, href = here ? '#calculator' : target;
+  if (o.c) return { href, arg };
+  const id = pageOfTool(kind);
+  const c = here ? 'Back to the full calculator at the top' : id ? `Full calculator: ${label(id)}` : undefined;
+  return { href, arg: c ? JSON.stringify({ ...o, c }) : arg };
+}
 ---
 <div class="prose prose-slate max-w-none prose-headings:font-serif">
-  {parts.map((p, i) => i % 3 === 0 ? <Fragment set:html={p ?? ''} /> : i % 3 === 1 ? <div data-chrome class="not-prose"><MiniSim client:load kind={p} arg={decode(parts[i + 1])} href={miniHref(p, path)} /></div> : null)}
+  {parts.map((p, i) => i % 3 === 0 ? <Fragment set:html={p ?? ''} /> : i % 3 === 1 ? <div data-chrome class="not-prose"><MiniSim client:load kind={p} {...link(p, decode(parts[i + 1]))} /></div> : null)}
 </div>

@@ -10,11 +10,11 @@ const stdW = 13;
 
 export default definePage({
   id: 'elimination-period', group: 'disability', order: 107, slug: 'elimination-period',
-  nav: 'Elimination period', card: 'The months before a disability policy pays: what they cost in spending, and how long your savings last.',
+  nav: 'Waiting period before benefits', card: 'The months before a disability policy pays: what they cost in spending, and how long your savings last.',
   title: 'Elimination Period 2026: The Months Before Disability Pay',
   description: 'Elimination period in 2026: what 90 or 180 days before benefits start cost in spending, with sick pay and savings counted, and when the first check lands.',
   h1: 'Elimination period: the months you carry yourself',
-  intro: 'Enter the spending you cannot cut, the elimination period of your policy, any sick pay that covers it and the savings you could use. The calculator shows the money missing before the first check.',
+  intro: 'Enter the spending you cannot cut, the elimination period of your policy (the waiting time before it pays), any sick pay that covers it and the savings you could use. The calculator shows the money missing before the first check.',
   resume: `The elimination period is the stretch of disability, counted in days, before a policy starts to pay; it works like a deductible measured in time. Long-term disability plans often use 90 or 180 days, individual policies offer choices from 30 days to a year, and short-term plans a few days. A longer period lowers the premium and raises the amount you must carry yourself. With ${K.usd(EXP)} of monthly spending you cannot cut, a 90-day period represents ${K.usd(d90.need)}; a 180-day period ${K.usd(d180.need)}. Savings of ${K.usd(8000)} would leave ${K.usd(d90.shortfall)} missing in the first case and ${K.usd(d180.shortfall)} in the second. Short-term disability, sick days or paid time off can fill the gap: a short-term plan paying ${K.usd(3000)} a month brings the 90-day shortfall to ${K.usd(withStd.shortfall)}. A plan that pays monthly in arrears sends its first check about a month after the period ends.`,
   faqs: [
     { q: 'What is a 90-day elimination period?', a: 'Ninety days of disability that must pass before the policy pays. The days are usually counted from the date the disability began, and the policy states whether they must be consecutive or can add up over a set window when you return to work briefly. Benefits then accrue from day 91, and a monthly plan pays them at the end of each month.' },

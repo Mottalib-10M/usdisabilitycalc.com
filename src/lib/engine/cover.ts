@@ -104,12 +104,14 @@ export function ltd(x: LtdIn) {
   const fedYear = taxAdded(ltdTaxableYear + ssTax, x.otherIncome, x.st);
   const ficaMonths = Math.max(0, FED.sickPayFicaMonths - Math.ceil(x.elimDays / 30.4375));
   const ficaFirstYear = sickPayFica(net, share, ficaMonths, x.payer);
+  // Payroll tax withheld from each of those first checks (0 once the window has passed or for an individual policy).
+  const ficaMonthly = ficaMonths > 0 ? sickPayFica(net, share, 1, x.payer) : 0;
   const inHand = net + Math.max(0, x.ssdi) - fedYear / 12;
   const th = takeHome(x.salary, x.st);
   return {
     formula: r2(formula), gross: r2(gross), capped, offsets: r2(offsets), net: r2(net), floorApplied, share,
     ltdTaxableYear: r2(ltdTaxableYear), ssTaxableYear: ssTax, fedMonthly: r2(fedYear / 12), ficaFirstYear, ficaMonths,
-    inHand: r2(inHand), takeHomeMonthly: r2(th.net / 12), replaced: th.net > 0 ? inHand / (th.net / 12) : 0,
+    ficaMonthly, inHand: r2(inHand), inHandFirst: r2(inHand - ficaMonthly), takeHomeMonthly: r2(th.net / 12), replaced: th.net > 0 ? inHand / (th.net / 12) : 0,
   };
 }
 /** Total payable from the start of benefits to the end of the benefit period (age or months), no cost-of-living rider. */
@@ -145,15 +147,20 @@ export function std(x: StdIn) {
 }
 
 /* ------------------------------------------------------------------ Premium: pre-tax or after-tax */
-export function premiumChoice(x: { salary: number; premium: number; benefit: number; months: number; st: Status }) {
+/** `waitMonths` = months between the last day worked and the first check: payroll tax only applies to checks paid within
+ *  6 calendar months of the last month worked (Pub. 15-A), so a 90-day elimination period leaves 3 taxed checks. */
+export function premiumChoice(x: { salary: number; premium: number; benefit: number; months: number; st: Status; waitMonths?: number }) {
   const m = marginalRate(x.salary, x.st);
   const payroll = x.salary < FED.socialSecurityWageBase ? FED.socialSecurityRate + FED.medicareRate : FED.medicareRate;
   const extraYearly = r2(x.premium * (m + payroll));
   const preTaxCost = r2(x.premium - extraYearly);
-  // A claim of `months` with no other income: federal tax on the benefit plus payroll tax for the first 6 months.
+  // A claim of `months` with no other income: federal income tax on the benefit plus payroll tax on the checks paid
+  // within the 6-month window.
   const claim = x.benefit * x.months;
-  const taxOnClaim = r2(taxAdded(claim, 0, x.st) + sickPayFica(x.benefit, 1, Math.min(6, x.months), 'pretax'));
-  return { marginal: m, payroll, extraYearly, preTaxCost, afterTaxCost: x.premium, claim: r2(claim), taxOnClaim, yearsCovered: extraYearly > 0 ? taxOnClaim / extraYearly : 0 };
+  const incomeTaxOnClaim = taxAdded(claim, 0, x.st);
+  const ficaOnClaim = sickPayFica(x.benefit, 1, Math.max(0, Math.min(x.months, FED.sickPayFicaMonths - (x.waitMonths ?? 0))), 'pretax');
+  const taxOnClaim = r2(incomeTaxOnClaim + ficaOnClaim);
+  return { marginal: m, payroll, extraYearly, preTaxCost, afterTaxCost: x.premium, claim: r2(claim), incomeTaxOnClaim, ficaOnClaim, taxOnClaim, yearsCovered: extraYearly > 0 ? taxOnClaim / extraYearly : 0 };
 }
 
 /* ------------------------------------------------------------------ Elimination period */
