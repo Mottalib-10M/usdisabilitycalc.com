@@ -14,7 +14,6 @@ import { readParams, updateURL } from '../../lib/url-state';
 import { getTool } from '../../lib/tool-specs';
 import type { Input, V } from '../../lib/tool-types';
 import MentionExemple from './MentionExemple';
-import { resumeRepli } from '../../lib/libelles-trame';
 import { attributsTableau, etiquettes } from '../../lib/tableaux';
 import { formatNumber } from '../../lib/format';
 
@@ -24,6 +23,12 @@ export function valeurAffichee(i: Input, v: V): string {
   if (i.kind === 'choice' || i.kind === 'select') return ((i.kind === 'select' && i.dyn ? i.dyn(v) : i.options).find((o) => o.value === String(x))?.label) ?? String(x);
   const n = Number(x), t = formatNumber(n, Number.isInteger(n) ? 0 : (i.decimals ?? 0));
   return i.unit === '$' ? `$${t}` : i.unit === '%' ? `${t}%` : `${t}${i.unit ? `\u00a0${i.unit}` : ''}`;
+}
+
+/** Title line of the folded fields (naive testers 2026-11-09, second pass: "Now: Split plan only: the part of the premium
+ *  you pay after tax 30% · Tax filing status Single" ran labels and values together). Each field by its short name. */
+export function resumeChamps(adv: Input[], v: V): string {
+  return `Already filled in: ${adv.map((i) => `${i.short ?? i.label} ${valeurAffichee(i, v)}`).join(' · ')}`;
 }
 
 interface Props { kind: string; arg?: string; methodHref?: string; idPrefix?: string }
@@ -71,13 +76,13 @@ export default function SpecTool({ kind, arg, methodHref, idPrefix = 't' }: Prop
           {main.map(field)}
           {adv.length > 0 && (
             <details className="sm:col-span-2 rounded-lg border border-navy-200 px-3 py-2">
-              <summary className="cursor-pointer text-sm font-medium text-navy-700">More options
-                <span data-actuellement className="mt-0.5 block text-xs font-normal text-navy-600">{resumeRepli('en', adv.map((i) => ({ label: i.label, valeur: valeurAffichee(i, v) })))}</span></summary>
+              <summary className="cursor-pointer text-sm font-medium text-navy-700">More details (optional)
+                <span data-actuellement className="mt-0.5 block text-xs font-normal text-navy-600">{resumeChamps(adv, v)}</span></summary>
               <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">{adv.map(field)}</div>
             </details>
           )}
         </form>
-        <ResultCard label={out.label} value={out.value} sub={out.sub} mention={<MentionExemple lang="en" touched={touched} />}>
+        <ResultCard label={out.label} value={out.value} sub={out.sub} mention={<MentionExemple lang="en" touched={touched} texte={out.example} />}>
           <Rows rows={out.rows} />
           {out.note && <p className="mt-2 text-xs text-navy-600">{out.note}</p>}
           <ShareRow methodHref={methodHref} />

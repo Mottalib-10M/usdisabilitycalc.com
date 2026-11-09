@@ -164,9 +164,11 @@ const crumbAside = Astro.slots.has('crumb-aside') ? (await Astro.slots.render('c
     </main>
     <footer class="mt-16 border-t border-navy-200 bg-navy-50">
       <div class="mx-auto max-w-6xl px-4 py-12">
-        {/* Brief of 2026-11-09: the footer took 3 to 5 phone screens on every page. The calculator columns fold under
-             one title on a phone (opened from 768 px by the script below); the site column stays visible. */}
-        <details id="footer-calculators" class="footer-fold">
+        {/* Brief of 2026-11-09 (second pass): on a phone the whole footer folds into one short block, its title the
+             line that matters (who publishes, not an insurer); opened from 768 px by the script below. */}
+        <details id="footer-site" class="footer-fold">
+        <summary class="cursor-pointer text-sm text-navy-700"><span class="font-semibold text-navy-900">&copy; {new Date().getFullYear()} {SITE_NAMES[lang]}</span> · independent, not an insurer · <span class="underline">all calculators, sources and legal notice</span></summary>
+        <details id="footer-calculators" class="footer-fold mt-6" open>
           <summary class="cursor-pointer text-sm font-semibold text-navy-900">Every calculator ({footerCols.slice(0, -1).reduce((n, c) => n + c.links.length, 0)})</summary>
           <div class="mt-4 grid grid-cols-2 gap-8 md:grid-cols-3">
             {footerCols.slice(0, -1).map((col) => (<div><h2 class="mb-3 text-sm font-semibold text-navy-900">{col.label}</h2><ul class="space-y-2 text-sm text-navy-600">{col.links.map((l) => <li><a href={l.href} class="hover:text-navy-900">{l.label}</a></li>)}</ul></div>))}
@@ -183,6 +185,7 @@ const crumbAside = Astro.slots.has('crumb-aside') ? (await Astro.slots.render('c
             {(GA4_ID || CLARITY_ID) && CONSENT_MODE !== 'none' && <p><button type="button" data-consent-manage class="underline hover:text-navy-900">{consentStrings(lang).manage}</button></p>}
           </div>
         </div>
+        </details>
       </div>
     </footer>
     <script>
@@ -195,7 +198,7 @@ const crumbAside = Astro.slots.has('crumb-aside') ? (await Astro.slots.render('c
         dd.addEventListener('mouseleave', () => { to = setTimeout(() => panel?.classList.add('hidden'), 150); });
         trigger?.addEventListener('click', () => { const h = panel?.classList.contains('hidden'); closeAll(); if (h) panel?.classList.remove('hidden'); }); });
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
-      if (window.matchMedia('(min-width: 768px)').matches) document.getElementById('footer-calculators')?.setAttribute('open', '');
+      if (window.matchMedia('(min-width: 768px)').matches) document.getElementById('footer-site')?.setAttribute('open', '');
       document.addEventListener('click', (e) => { if (!(e.target as HTMLElement).closest('.nav-dropdown')) closeAll(); });
     </script>
     <ConsentBanner lang={lang} />

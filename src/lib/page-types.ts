@@ -4,7 +4,7 @@
  */
 import type { Kit } from './kit';
 
-export interface FAQ { q: string; a: string }
+export interface FAQ { q: string; a: string; /** Shown open: the answer a reader of that age or case comes for. */ open?: boolean }
 export interface MiniOpts { /** title */ t?: string; /** ids of the fields shown */ p?: string[]; /** default values */ d?: Record<string, number | string>; /** link text */ c?: string }
 
 export interface Helpers extends Kit {
@@ -35,6 +35,8 @@ export interface PageDef {
   /** 150 to 160 characters, year included. */
   description: string;
   h1: string; intro: string;
+  /** Link right under the intro to a case lower on the page (testers 2026-11-09: the 61 case came 7 screens down). */
+  jump?: { href: string; label: string };
   /** ONE paragraph of 120 words or more: the direct answer with the figures (RECETTE §21). */
   resume: string;
   faqs: FAQ[];

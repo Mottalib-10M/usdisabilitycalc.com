@@ -23,13 +23,13 @@ describe('same case, same figure on every screen', () => {
     expect(page.v.sal).toBe(EX.sal);
     expect(page.v.wk).toBe(EX.stdWeeks);
     expect(page.v.wait).toBe(EX.stdWait);
-    expect(row(home.rows, /short-term disability, a week after tax/)).toBe(page.out.value);
+    expect(row(home.rows, /short-term disability after tax/)).toBe(`${page.out.value} a week`);
   });
   it('home and long-term page: same monthly check and same payroll tax line', () => {
     const home = run('all').out, page = run('ltd').out;
     expect(home.value).toBe(page.value);
-    expect(row(home.rows, /^Social Security and Medicare/)).toBeDefined();
-    expect(row(home.rows, /^Social Security and Medicare/)).toBe(row(page.rows, /^Social Security and Medicare/));
+    expect(row(home.rows, /^Payroll tax/)).toBeDefined();
+    expect(row(home.rows, /^Payroll tax/)).toBe(row(page.rows, /^Payroll tax/));
   });
   it('the elimination period sets the number of checks that carry payroll tax', () => {
     const r = example();
@@ -42,12 +42,12 @@ describe('same case, same figure on every screen', () => {
     expect(out.label).not.toMatch(/federal tax on/i);
     expect(out.label).toMatch(/keep/i);
     // Same $3,000 benefit as the long-term example: same payroll tax over the same checks.
-    expect(row(out.rows, /^Social Security and Medicare/)).toBe(usd(example().ficaFirstYear));
+    expect(row(out.rows, /^Payroll tax/)).toBe(usd(example().ficaFirstYear));
   });
   it('pre-tax election: the tax on a one-year claim equals the tax calculator for the same benefit', () => {
     const pre = run('premium').out, tax = run('tax').out;
-    expect(row(pre.rows, /^Income tax on them/)).toBe(row(tax.rows, /^Federal income tax added/));
-    expect(row(pre.rows, /^Social Security and Medicare/)).toBe(row(tax.rows, /^Social Security and Medicare/));
+    expect(row(pre.rows, /^Income tax on them/)).toBe(row(tax.rows, /^Federal income tax on it/));
+    expect(row(pre.rows, /^Payroll tax/)).toBe(row(tax.rows, /^Payroll tax/));
     expect(pre.value).toMatch(/years$/);
   });
   it('needs calculator: the group plan after tax is taken off, the rest is the policy to buy', () => {
@@ -59,12 +59,41 @@ describe('same case, same figure on every screen', () => {
   });
   it('the home short-term line is the engine at the plan medians and the shared absence', () => {
     const s = std({ salary: EX.sal, pct: (PRIVATE.std_median_pct ?? 60) / 100, capWeekly: PRIVATE.std_max_weekly_p50 ?? 1000, weeks: EX.stdWeeks, waitDays: EX.stdWait, payer: 'employer', employeeShare: 0, st: 'single' });
-    expect(row(run('all').out.rows, /short-term/)).toBe(usd(s.netWeekly));
+    expect(row(run('all').out.rows, /short-term/)).toBe(`${usd(s.netWeekly)} a week`);
   });
   it('claim calculator: a claim at 61 runs to the end age, after the wait', () => {
     const { out } = run('claim', { age: 61 });
-    expect(out.label).toBe(`Paid from age 61 to ${EX.endAge}, before tax`);
-    expect(out.value).toBe(usd(example().net * Math.round((EX.endAge - 61) * 12 - EX.elimDays / 30.4375)));
+    const r = example(), months = Math.round((EX.endAge - 61) * 12 - EX.elimDays / 30.4375);
+    expect(out.label).toBe(`In your pocket from age 61 to ${EX.endAge}, after federal tax`);
+    expect(row(out.rows, /^All checks, before tax/)).toBe(usd(r.net * months));
+    // After tax: income tax on every check, payroll tax on the first checks only.
+    expect(out.value).toBe(usd(Math.round(r.inHand * months) - Math.round(r.ficaMonthly * r.ficaMonths)));
+    expect(row(out.rows, /^Number of monthly checks/)).toMatch(new RegExp(`^${months}, from age 61 and 3 months to ${EX.endAge}$`));
+  });
+});
+
+describe('second pass of the naive testers (2026-11-09)', () => {
+  it('every amount of the home result carries its unit', () => {
+    for (const [, v] of run('all').out.rows) expect(v).toMatch(/ a (week|month)$/);
+  });
+  it('the home sub says why the first checks are smaller', () => {
+    expect(run('all').out.sub).toMatch(/The first 3 checks are \$[\d,]+: payroll tax \(Social Security and Medicare\)/);
+  });
+  it('the year count of the pre-tax election is a whole number past ten, with both amounts next to it', () => {
+    const { out } = run('premium');
+    expect(out.value).not.toMatch(/\.0 /);
+    expect(out.sub).toMatch(/saves you \$[\d,]+ a year.*costs you \$[\d,]+ in tax/);
+  });
+  it('the second quote of the cost page differs from the first', () => {
+    expect(run('cost').out.value).toMatch(/months$/);
+    expect(run('cost', { prem: 90, ben: 2500 }).out.value).not.toBe(run('cost').out.value);
+  });
+  it('the shared-cost row says the split it assumes, and every untouched result says what it assumes', () => {
+    expect(JSON.stringify(run('all').out.table)).toMatch(/Shared: employer pays 70%, I pay 30% after tax/);
+    for (const k of ['all', 'ltd', 'std', 'tax', 'premium', 'cost', 'need', 'claim', 'employer', 'offset']) expect(run(k).out.example).toMatch(/^(Example|National)/);
+  });
+  it('the long-term age is a visible field', () => {
+    expect(getTool('ltd').inputs.find((i) => i.id === 'age')?.adv).toBeFalsy();
   });
 });
 

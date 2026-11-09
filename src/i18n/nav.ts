@@ -5,8 +5,8 @@ export interface NavLink { href: string; label: string } export interface NavCat
 const CORE: Record<string, string> = { home: 'Disability benefit calculator', method: 'How the figures are built', about: 'About', widget: 'Embed the calculator', contact: 'Contact', editorial: 'Editorial policy', privacy: 'Privacy', terms: 'Legal notice', cookies: 'Cookies' };
 export const GROUPS: Array<{ id: Group; label: string }> = [
   { id: 'disability', label: 'Disability income' },
-  { id: 'care', label: 'Long-term care' },
-  { id: 'accident', label: 'Accident and supplemental' },
+  { id: 'care', label: 'Long-term care (help in old age, not disability pay)' },
+  { id: 'accident', label: 'Accident and hospital cash (not disability pay)' },
 ];
 export const label = (id: string, _lang?: Locale) => CORE[id] ?? pageById(id)?.nav ?? id;
 const link = (id: string, lang: Locale): NavLink => ({ href: route(id, lang), label: label(id) });

@@ -38,10 +38,10 @@ const linkCls = 'font-medium text-accent-700 underline underline-offset-2';
     <p class="mt-2 text-sm font-medium text-navy-700">Independent site: not an insurer or a broker. No quote, no policy sold, no contact details asked.</p>
   </header>
   <details id="start" data-chrome class="mb-4 rounded-lg border border-navy-200 bg-navy-50 px-4 py-2">
-    <summary class="cursor-pointer py-1 text-sm font-semibold text-accent-700">Not sure where to start? Three questions</summary>
+    <summary class="cursor-pointer py-1 text-sm font-semibold text-accent-700">Help: what to type in each box (3 steps)</summary>
     <ol class="mt-2 list-decimal space-y-2 pl-5 pb-2 text-sm text-navy-800">
       <li><strong>What do you earn?</strong> Type your yearly pay before tax in the first box.</li>
-      <li><strong>Who pays for the coverage?</strong> Look at your pay stub. No disability line: pick “My employer”. A disability line among the pre-tax deductions: pick the pre-tax option. A line taken after tax: the after-tax option. A policy you bought yourself: the last option.</li>
+      <li><strong>Who pays for the insurance?</strong> Look at your pay stub. No disability line: pick “My employer pays it all”. A disability line among the pre-tax deductions: pick “Taken from my pay before tax”. A line taken after tax: “Taken from my pay after tax”. A policy you bought yourself: the last option.</li>
       <li><strong>Do you have your plan summary?</strong> No: keep {pctPlan}% and {K.usd(cap)}, the most common plan. Yes: copy its share of pay and its monthly maximum.</li>
     </ol>
     <p class="pb-2 text-sm text-navy-700">Off work for a few weeks? <a href={route('short-term-disability-insurance', lang)} class={linkCls}>Short-term disability calculator</a>. Asked “pre-tax or after-tax?” at enrollment? <a href={route('pre-tax-vs-after-tax-disability-premiums', lang)} class={linkCls}>The election, compared</a>. No plan at work? <a href={route('how-much-disability-insurance-do-i-need', lang)} class={linkCls}>How much coverage you need</a>.</p>
@@ -56,8 +56,11 @@ const linkCls = 'font-medium text-accent-700 underline underline-offset-2';
       <Body html={x.folds[0].html(h)} path={path} />
       <div data-chrome><Fragment set:html={table(['Workers', 'Short-term disability', 'Long-term disability', 'Long-term care'], blsRows, `Who is offered disability coverage at work: share of workers with access to each plan, March 2026. Bureau of Labor Statistics, National Compensation Survey, published September 25, 2026; read ${K.day(K.RETRIEVED)}. Industries, sizes, hours and wage groups are private industry.`, ['l', 'r', 'r', 'r'])} /></div>
     </Fold>
-    {x.folds.slice(1).map((f) => <Fold title={f.title} id={f.id}><Body html={f.html(h)} path={path} /></Fold>)}
+    {x.folds.filter((f) => f.id === 'cost').map((f) => <Fold title={f.title} id={f.id}><Body html={f.html(h)} path={path} /></Fold>)}
     <Fold title="Why this site exists" id="why"><p class="text-navy-800">{VALUE}</p></Fold>
+    {/* Testers 2026-11-09 (second pass): long-term care and accident folds read as "am I still on the right site?". */}
+    <h2 class="mt-8 mb-2 text-base font-semibold text-navy-900">Other insurance this site also covers (not disability pay)</h2>
+    {x.folds.filter((f) => f.id !== 'cost' && f.id !== 'plan-data').map((f) => <Fold title={f.title} id={f.id}><Body html={f.html(h)} path={path} /></Fold>)}
     <div data-chrome>
       <Fold title="Every calculator by topic" id="calculators">
         <div class="mt-2 grid gap-6 sm:grid-cols-3">
