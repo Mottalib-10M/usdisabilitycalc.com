@@ -23,13 +23,15 @@ describe('same case, same figure on every screen', () => {
     expect(page.v.sal).toBe(EX.sal);
     expect(page.v.wk).toBe(EX.stdWeeks);
     expect(page.v.wait).toBe(EX.stdWait);
-    expect(row(home.rows, /short-term disability after tax/)).toBe(`${page.out.value} a week`);
+    expect(row(home.rows, /short-term plan/)).toBe(`${page.out.value} a week`);
   });
-  it('home and long-term page: same monthly check and same payroll tax line', () => {
+  it('home and long-term page: same monthly check and same first checks after payroll tax', () => {
     const home = run('all').out, page = run('ltd').out;
     expect(home.value).toBe(page.value);
-    expect(row(home.rows, /^Payroll tax/)).toBeDefined();
-    expect(row(home.rows, /^Payroll tax/)).toBe(row(page.rows, /^Payroll tax/));
+    expect(row(page.rows, /^Payroll tax/)).toBeDefined();
+    const first = /The first \d+ checks are (\$[\d,]+)/.exec(page.sub ?? '')?.[1];
+    expect(first).toBeDefined();
+    expect(row(home.rows, /long-term check, after income tax and payroll tax/)).toBe(`${first} a month`);
   });
   it('the elimination period sets the number of checks that carry payroll tax', () => {
     const r = example();
@@ -76,8 +78,11 @@ describe('second pass of the naive testers (2026-11-09)', () => {
   it('every amount of the home result carries its unit', () => {
     for (const [, v] of run('all').out.rows) expect(v).toMatch(/ a (week|month)$/);
   });
-  it('the home sub says why the first checks are smaller', () => {
-    expect(run('all').out.sub).toMatch(/The first 3 checks are \$[\d,]+: payroll tax \(Social Security and Medicare\)/);
+  it('the home result says why the first checks are smaller, in the order the checks come (testers 2026-11-10)', () => {
+    const labels = run('all').out.rows.map(([l]) => l);
+    expect(labels.some((l) => /^Months 4 to 6: long-term check, after income tax and payroll tax$/.test(l))).toBe(true);
+    expect(labels.some((l) => /^From month 7: long-term check, after income tax$/.test(l))).toBe(true);
+    expect(run('ltd').out.sub).toMatch(/The first 3 checks are \$[\d,]+: payroll tax \(Social Security and Medicare\)/);
   });
   it('the year count of the pre-tax election is a whole number past ten, with both amounts next to it', () => {
     const { out } = run('premium');

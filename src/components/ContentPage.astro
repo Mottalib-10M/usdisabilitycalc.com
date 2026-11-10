@@ -32,9 +32,9 @@ const sources = page.sources.map((k) => ({ name: SOURCES[k].label, url: SOURCES[
       {page.jump && <p class="mt-2 text-base font-medium"><a href={page.jump.href} class="text-accent-700 underline underline-offset-2">{page.jump.label} ↓</a></p>}
     </header>
     <div id="calculator" data-outil data-chrome class="mb-4 scroll-mt-20"><Tool kind={page.tool} arg={page.toolArg} idPrefix={`p${page.order}`} /></div>
-    <p class="mb-6 text-sm text-navy-600">{ui.reviewedBy} <a href={route('about', lang)} class="underline hover:text-navy-900">{AUTHOR_NAME}</a> · <a href={route('method', lang)} class="underline hover:text-navy-900">{label('method')}</a> · IRS rules and BLS plan data read {K.day(K.RETRIEVED)}</p>
+    <p class="mb-6 text-sm text-navy-600">{ui.reviewedBy} <a href={route('about', lang)} class="underline hover:text-navy-900">{AUTHOR_NAME}</a> · <a href={route('method', lang)} class="underline hover:text-navy-900">{label('method')}</a></p>
     <Clamp text={page.resume} lang={lang} id={`clamp-${page.id}`} class="mb-8" />
-    {/* The first two sections stay open; the later ones fold under their titles (brief of 2026-11-09). */}
-    <Body html={page.body(helpers())} path={path} open={2} />
+    {/* Three sections at most, all open (brief of 2026-11-10, rule 3: shorter pages, the essential never folded). */}
+    <Body html={page.body(helpers())} path={path} open={3} />
   </article>
 </PageLayout>

@@ -38,7 +38,7 @@ export default function MiniSim({ kind, href, arg }: Props) {
             : <NumberField key={i.id} id={`m-${kind}-${i.id}`} label={i.label} value={Number(v[i.id])} onChange={set(i.id)} unit={i.unit} max={i.max} decimals={i.decimals} />)}
         </form>
         <div aria-live="polite" className="rounded-lg bg-navy-50 p-4">
-          <MentionExemple lang="en" touched={touched} texte={out.example} />
+          <MentionExemple lang="en" touched={touched} texte={out.example} aide={out.exampleAide} />
           <p className="text-sm font-medium text-navy-600">{out.label}</p>
           <p className="tabular-nums mt-1 text-3xl font-bold text-navy-900">{out.value}</p>
           {out.sub && <p className="mt-1 text-sm text-navy-700">{out.sub}</p>}

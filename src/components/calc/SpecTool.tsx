@@ -42,7 +42,9 @@ export default function SpecTool({ kind, arg, methodHref, idPrefix = 't' }: Prop
   useEffect(() => {
     const u = readParams(window.location.search);
     if (![...u.keys()].length) return;
-    setTouched({ lien: true });
+    // A door by profile (?age=61 from the home page) is still the example case: the mention stays, the result says so.
+    const profil = spec.profiles?.some((p) => [...u.keys()].every((k) => k in p.set && String(p.set[k]) === u.get(k)));
+    if (!profil) setTouched({ lien: true });
     const next: V = { ...defaults };
     for (const i of spec.inputs) {
       const x = u.get(i.id);
@@ -73,6 +75,18 @@ export default function SpecTool({ kind, arg, methodHref, idPrefix = 't' }: Prop
     <div className="rounded-xl border border-navy-200 bg-white p-4 sm:p-5">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
         <form className="grid content-start grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
+          {spec.profiles && spec.profiles.length > 0 && (
+            <div data-profils className="sm:col-span-2">
+              <p className="mb-1 text-sm font-medium text-navy-700">Start from your case</p>
+              <div className="flex flex-wrap gap-2">
+                {spec.profiles.map((p) => {
+                  const on = Object.entries(p.set).every(([k, x]) => String(v[k]) === String(x));
+                  return <button key={p.label} type="button" aria-pressed={on} onClick={() => setV((o) => fit({ ...o, ...p.set }))}
+                    className={`min-h-11 rounded-full border px-4 py-2 text-sm font-medium ${on ? 'border-accent-700 bg-accent-700 text-white' : 'border-navy-300 bg-white text-navy-800 hover:bg-navy-50'}`}>{p.label}</button>;
+                })}
+              </div>
+            </div>
+          )}
           {main.map(field)}
           {adv.length > 0 && (
             <details className="sm:col-span-2 rounded-lg border border-navy-200 px-3 py-2">
@@ -82,7 +96,7 @@ export default function SpecTool({ kind, arg, methodHref, idPrefix = 't' }: Prop
             </details>
           )}
         </form>
-        <ResultCard label={out.label} value={out.value} sub={out.sub} mention={<MentionExemple lang="en" touched={touched} texte={out.example} />}>
+        <ResultCard label={out.label} value={out.value} sub={out.sub} mention={<MentionExemple lang="en" touched={touched} texte={out.example} aide={out.exampleAide} />}>
           <Rows rows={out.rows} />
           {out.note && <p className="mt-2 text-xs text-navy-600">{out.note}</p>}
           <ShareRow methodHref={methodHref} />

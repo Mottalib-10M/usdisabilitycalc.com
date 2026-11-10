@@ -34,7 +34,8 @@ export const EX_WAIT_MONTHS = Math.ceil(EX.elimDays / 30.4375);
 
 /* Fields shared by several calculators. */
 const SAL = (def: number = EX.sal): Input => ({ id: 'sal', label: 'Yearly salary before tax', def, unit: '$', max: 5000000, help: 'Base pay the plan counts, usually without bonus' });
-const FS: Input = { kind: 'select', id: 'fs', label: 'Married or single (for tax)', short: 'for tax:', def: 'single', adv: true, options: [{ value: 'single', label: 'Single' }, { value: 'mfj', label: 'Married filing jointly' }, { value: 'hoh', label: 'Head of household' }] };
+/** Visible on every calculator (brief of 2026-11-10, rule 5: an assumption that changes the result is never folded). */
+const FS: Input = { kind: 'select', id: 'fs', label: 'Married or single (for tax)', short: 'for tax:', def: 'single', help: 'Not sure? Keep Single: it counts the most tax', options: [{ value: 'single', label: 'Single' }, { value: 'mfj', label: 'Married filing jointly' }, { value: 'hoh', label: 'Head of household' }] };
 export const PAYERS: Array<{ value: Payer; label: string }> = [
   { value: 'employer', label: 'My employer pays it all' },
   { value: 'pretax', label: 'Taken from my pay before tax (pre-tax)' },
@@ -42,6 +43,8 @@ export const PAYERS: Array<{ value: Payer; label: string }> = [
   { value: 'split', label: 'Shared: my employer and me (my part after tax)' },
   { value: 'own', label: 'I bought it myself (individual policy)' },
 ];
+/** The payer of the example in plain words; "Not sure" says what it is counted as. */
+const paidBy = (v: V) => (s(v, 'payer') === 'unsure' ? 'payer not known, counted as your employer' : PAID_BY[payerOf(v)]);
 /** A row of the "by who pays" tables: the shared case says the split it assumes (testers 2026-11-09: "70% taxable"?). */
 const payerRow = (p: Payer, share: number) => (p === 'split' ? `Shared: employer pays ${pct(1 - share)}, I pay ${pct(share)} after tax` : PAYERS.find((x) => x.value === p)!.label);
 /** The example case in plain words, for the mention shown on an untouched result (brief of 2026-11-09, second pass). */
@@ -49,8 +52,11 @@ const PAID_BY: Record<Payer, string> = {
   employer: 'plan paid by your employer', pretax: 'premium taken from your pay before tax', aftertax: 'premium taken from your pay after tax',
   split: 'premium shared with your employer', own: 'a policy you bought yourself',
 };
-const PAYER_HELP = 'Look at your pay stub: no disability line means your employer pays; a line marked pre-tax means the pre-tax option';
-const PAYER = (def: Payer = 'employer', help = PAYER_HELP): Input => ({ kind: 'select', id: 'payer', label: 'Who pays for this insurance (the premium)', def, options: PAYERS, help });
+const PAYER_HELP = 'No disability line on your pay stub: your employer pays. A line marked pre-tax: the pre-tax option. Not sure? Keep “Not sure”';
+/** The way out for a reader who does not know (brief of 2026-11-10, rule 5): counted as employer-paid, the case of most
+ *  covered workers, which also shows the most tax. Never in the "by who pays" tables. */
+const UNSURE = { value: 'unsure', label: 'Not sure (counted as employer-paid)' };
+const PAYER = (def: Payer | 'unsure' = 'unsure', help = PAYER_HELP): Input => ({ kind: 'select', id: 'payer', label: 'Who pays for this insurance (the premium)', def, options: [UNSURE, ...PAYERS], help });
 const SHARE: Input = { id: 'share', label: 'Shared cost only: the part you pay from your pay after tax', short: 'your part if shared', def: 30, unit: '%', max: 100, adv: true, help: 'Only if you picked “Shared” above' };
 const PCT = (id: string, label: string, def: number, help?: string, adv = false): Input => ({ id, label, def, unit: '%', max: 100, help, adv });
 const MONEY = (id: string, label: string, def: number, help?: string, adv = false, max = 10000000): Input => ({ id, label, def, unit: '$', max, help, adv });
@@ -64,7 +70,7 @@ const DIVISION_STATES: Record<string, string> = {
 };
 export const groupLabel = (l: string) => (DIVISION_STATES[l] ? `${l} (${DIVISION_STATES[l]})` : l);
 const fsOf = (v: V) => (s(v, 'fs') || 'single') as Status;
-const payerOf = (v: V) => (s(v, 'payer') || 'employer') as Payer;
+const payerOf = (v: V) => { const p = s(v, 'payer'); return (!p || p === 'unsure' ? 'employer' : p) as Payer; };
 const shareOf = (v: V) => n(v, 'share') / 100;
 /** Why the benefit is taxed or not, in the reader's own terms ("because your employer pays the premium"). */
 const PAYS: Record<Payer, string> = {
@@ -72,8 +78,13 @@ const PAYS: Record<Payer, string> = {
   split: 'your employer pays part of the premium', own: 'you bought the policy with your own money',
 };
 const payerName = (p: Payer) => PAYS[p];
+/** Why the benefit is taxed, said honestly when the reader picked “Not sure”. */
+const taxLine = (share: number, v: V) => (s(v, 'payer') === 'unsure'
+  ? `You kept “Not sure”, so the benefit is counted as paid by your employer, the most common case: ${taxWord(share)}.`
+  : `The benefit is ${taxWord(share)} because ${payerName(payerOf(v))}.`);
 /** What is left, from the rounded lines the reader sees, so that the subtraction on screen is exact. */
 const keep = (x: number, ...cuts: number[]) => Math.round(x) - cuts.reduce((t, c) => t + Math.round(c), 0);
+const fsWord = (v: V) => ({ single: 'single', mfj: 'married filing jointly', hoh: 'head of household' } as Record<string, string>)[s(v, 'fs') || 'single'];
 const taxWord = (share: number) => (share === 0 ? 'tax-free' : share === 1 ? 'fully taxable' : `${pct(share)} taxable (the employer’s part)`);
 
 /** Applies `arg` to the defaults of a list of fields. */
@@ -102,75 +113,87 @@ const firstChecks = (r: ReturnType<typeof ltd>) => (r.ficaMonthly > 0 ? ` The fi
 
 type Arg = Record<string, number | string>;
 const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
-  /** Home: one salary, the plan formulas, who pays, and both benefits after tax, in the order they are paid. */
+  /** Home: one salary, who pays, and the checks in the order they come (brief of 2026-11-10, rule 1: each amount says
+   *  its period; testers: "$556 a week" next to monthly amounts, "$2,822 or $2,592?"). */
   all: (arg = {}) => {
     const ltdPct = PRIVATE.ltd_median_pct ?? 60, ltdCap = PRIVATE.ltd_max_monthly_p50 ?? 10000;
     return spec([
-      SAL(), PAYER(), PCT('pct', 'Long-term disability: share of pay', ltdPct, PLAN_PCT_HELP(ltdPct)),
-      MONEY('cap', 'Long-term disability: monthly maximum', ltdCap, PLAN_CAP_HELP(ltdCap)),
+      SAL(), PAYER(), FS,
+      { ...PCT('pct', 'Long-term disability: share of pay', ltdPct, PLAN_PCT_HELP(ltdPct), true), short: 'plan pays' },
+      { ...MONEY('cap', 'Long-term disability: monthly maximum', ltdCap, PLAN_CAP_HELP(ltdCap), true), short: 'up to' },
       { ...PCT('spct', 'Short-term disability: share of pay', PRIVATE.std_median_pct ?? 60, undefined, true), short: 'short-term share of pay' },
       { ...MONEY('scap', 'Short-term disability: weekly maximum', PRIVATE.std_max_weekly_p50 ?? 1000, undefined, true), short: 'short-term weekly maximum' },
       { ...MONEY('ssdi', 'Disability checks you expect from Social Security, a month (0 if none)', 0, 'Your Social Security statement shows it; plans subtract it', true), short: 'Social Security disability checks' },
-      SHARE, FS,
+      SHARE,
     ], arg, (v) => {
       const r = ltd(ltdIn(v));
       const sd = std(stdIn(v, 'spct', 'scap'));
-      // Each amount carries its own unit, in the order the checks come (testers 2026-11-09: week and month mixed).
+      const first = keep(r.inHand, r.ficaMonthly);
+      const m0 = EX_WAIT_MONTHS + 1, m1 = EX_WAIT_MONTHS + r.ficaMonths;
+      // The checks in the order they come, each with its period (testers 2026-11-10).
       const rows: ToolOut['rows'] = [
         ['Take-home pay now', `${usd(r.takeHomeMonthly)} a month`, r.takeHomeMonthly],
-        [`First weeks off: short-term disability after tax, for ${EX.stdWeeks} paid weeks`, `${usd(sd.netWeekly)} a week`],
-        [`From month ${EX_WAIT_MONTHS + 1}, after the ${EX.elimDays}-day wait: long-term disability before tax`, `${usd(r.net)} a month`, r.net],
+        [`Months 1 to ${EX_WAIT_MONTHS}, after ${EX.stdWait} unpaid days: short-term plan if you have one, after tax`, `${usd(sd.netWeekly)} a week`],
+        ...(r.ficaMonthly > 0 ? [[`Months ${m0} to ${m1}: long-term check, after income tax and payroll tax`, `${usd(first)} a month`] as [string, string]] : []),
+        [`From month ${r.ficaMonthly > 0 ? m1 + 1 : m0}: long-term check, after income tax`, `${usd(r.inHand)} a month`, r.inHand],
+        [`Long-term check before tax (${pct(n(v, 'pct') / 100)} of pay)`, `${usd(r.net)} a month`],
         ['Federal income tax on it', `${usd(r.fedMonthly)} a month`],
-        ...ficaRow(r),
       ];
       const table = {
-        caption: 'The same plan, by who pays for it: long-term disability in hand each month, after federal income tax',
+        caption: `The same plan, by who pays for it: long-term check in hand each month from month ${r.ficaMonthly > 0 ? m1 + 1 : m0}, after federal income tax`,
         headers: ['Premium paid by', 'Benefit is', 'In hand a month'],
         rows: PAYERS.map((p) => { const x = ltd({ ...ltdIn(v), payer: p.value }); return [payerRow(p.value, shareOf(v)), taxWord(x.share), usd(x.inHand)]; }),
         align: ['l', 'l', 'r'] as Array<'l' | 'r'>,
       };
       return {
-        label: 'Long-term disability in your pocket, a month', value: usd(r.inHand),
-        sub: `${pct(r.replaced)} of the ${usd(r.takeHomeMonthly)} you take home a month today${r.capped ? ', held down by the monthly maximum' : ''}.${firstChecks(r)}`,
+        label: 'Long-term disability check in your pocket, a month', value: usd(r.inHand),
+        sub: `${pct(r.replaced)} of the ${usd(r.takeHomeMonthly)} you take home a month today${r.capped ? ', held down by the monthly maximum' : ''}. Assumes federal tax only, ${fsWord(v)}, from month ${r.ficaMonthly > 0 ? m1 + 1 : m0} of your absence until the plan stops, often at 65.`,
         rows, table,
-        note: `Federal income tax with the 2026 brackets: the benefit is ${taxWord(r.share)} because ${payerName(payerOf(v))}. Short-term: you are off ${EX.stdWait} unpaid days, then ${EX.stdWeeks} paid weeks of ${usd(sd.weekly)} before tax (plans often pay up to ${PRIVATE.std_weeks_p50 ?? 26} weeks). State income tax is not included: in a state with an income tax, your check will be a bit lower.`,
-        example: `Example: a ${usd(n(v, 'sal'))} salary, single, ${PAID_BY[payerOf(v)]}`,
+        note: `${taxLine(r.share, v)} The short-term check is taxed at a higher rate: it adds to the pay you already earned this year. State income tax is not included: in a state with an income tax, your check will be lower.`,
+        example: `Example: a ${usd(n(v, 'sal'))} salary, ${fsWord(v)}, ${paidBy(v)}`,
       };
     });
   },
 
   /** Long-term disability, a month. */
   /** The age is a visible field (testers 2026-11-09: hidden at 45, the 61-year-old read $711,000 as hers). */
-  ltd: (arg = {}) => spec([
-    SAL(), NUM('age', 'Your age when the claim starts', EX.age, 'yr', 75, 'It sets how long the plan pays, up to the end age'),
-    PAYER(), PCT('pct', 'Share of pay the plan replaces', PRIVATE.ltd_median_pct ?? 60, PLAN_PCT_HELP(PRIVATE.ltd_median_pct ?? 60)),
+  ltd: (arg = {}) => ({ ...spec([
+    NUM('age', 'Your age when the claim starts', EX.age, 'yr', 75, 'It sets how many checks you get before they stop'),
+    NUM('end', 'Benefits stop at age', EX.endAge, 'yr', 80, 'Not sure? Keep 65, the most common end age'),
+    SAL(), PAYER(), FS,
+    PCT('pct', 'Share of pay the plan replaces', PRIVATE.ltd_median_pct ?? 60, PLAN_PCT_HELP(PRIVATE.ltd_median_pct ?? 60)),
     MONEY('cap', 'Monthly maximum benefit', PRIVATE.ltd_max_monthly_p50 ?? 10000, PLAN_CAP_HELP(PRIVATE.ltd_max_monthly_p50 ?? 10000)),
-    MONEY('ssdi', 'Disability checks from Social Security, a month (0 if none)', 0, 'The plan takes your award, and your family’s, off its check'),
+    { ...MONEY('ssdi', 'Disability checks from Social Security, a month', 0, 'The plan takes them off its check. None yet? Keep 0', true), short: 'Social Security disability checks' },
     { ...MONEY('oth', 'Other income the plan takes off, a month', 0, 'Workers’ compensation, state disability, pension', true), short: 'other income taken off' },
     { ...MONEY('min', 'Minimum monthly benefit in your plan', 0, 'The least the plan pays after taking other income off; 0 if none', true), short: 'plan minimum' },
     { ...NUM('elim', 'Waiting period before the plan pays (elimination period)', EX.elimDays, 'days', 730, 'From your plan summary', true), short: 'waiting period' },
-    { ...NUM('end', 'Benefits stop at age', EX.endAge, 'yr', 80, 'From the plan; often 65 or your Social Security full retirement age', true), short: 'checks stop at age' },
     { ...MONEY('inc', 'Other taxable income of the household, a year', 0, 'A spouse’s pay, interest', true), short: 'other household income' },
-    SHARE, FS,
+    SHARE,
   ], arg, (v) => {
     const r = ltd(ltdIn(v));
-    const whole = ltdTotal(r.net, n(v, 'age'), n(v, 'end'), v.elim === undefined ? EX.elimDays : n(v, 'elim'));
+    const elim = v.elim === undefined ? EX.elimDays : n(v, 'elim');
+    const whole = ltdTotal(r.net, n(v, 'age'), n(v, 'end'), elim);
+    const pocket = keep(r.inHand * whole.months, r.ficaMonthly * Math.min(r.ficaMonths, whole.months));
+    const waitMo = Math.round(elim / 30.4375);
     const rows: ToolOut['rows'] = [
-      ['Plan formula before the maximum', usd(r.formula)],
-      ['Benefit before other income is taken off', usd(r.gross), r.gross],
-      ['Other disability income taken off (offsets)', usd(r.offsets), r.offsets],
-      ['Paid by the plan, a month', usd(r.net), r.net],
-      ['Federal income tax, a month', usd(r.fedMonthly)],
+      [`Checks until age ${n(v, 'end')}, from age ${n(v, 'age')}${waitMo > 0 ? ` and ${mo(waitMo)}` : ''}`, `${formatNumber(whole.months, 0)} checks (${yr(whole.months / 12)})`],
+      [`All those checks together, after federal tax`, usd(pocket)],
+      ['Paid by the plan before tax', `${usd(r.net)} a month`],
+      ['Federal income tax on it', `${usd(r.fedMonthly)} a month`],
       ...ficaRow(r),
-      ['Take-home pay now, a month', usd(r.takeHomeMonthly)],
-      [`Whole claim from age ${n(v, 'age')} to ${n(v, 'end')}, before tax (${yr(whole.months / 12)})`, usd(whole.total)],
+      ...(r.offsets > 0 ? [['Social Security and other income taken off (the offset)', `${usd(r.offsets)} a month`] as [string, string]] : []),
+      ['Take-home pay now', `${usd(r.takeHomeMonthly)} a month`],
     ];
     return {
-      label: 'Long-term disability in your pocket, a month', value: usd(r.inHand), sub: `${pct(r.replaced)} of the ${usd(r.takeHomeMonthly)} you take home a month today · the plan pays ${usd(r.net)} before tax${r.floorApplied ? ' (plan minimum)' : ''}.${firstChecks(r)}`,
-      rows, example: `Example: age ${n(v, 'age')}, a ${usd(n(v, 'sal'))} salary, ${PAID_BY[payerOf(v)]}`,
-      note: r.capped ? `The formula gives ${usd(r.formula)}, the maximum cuts it to ${usd(r.gross)}: that maximum sits ${capRank(n(v, 'cap'))} of private plans with a maximum (BLS, March 2026).` : `The benefit is ${taxWord(r.share)} for federal income tax because ${payerName(payerOf(v))}. Payroll tax stops 6 months after your last month of work, so after a ${v.elim === undefined ? EX.elimDays : n(v, 'elim')}-day wait only the first checks carry it.`,
+      label: 'Long-term disability check in your pocket, a month', value: usd(r.inHand),
+      sub: `${pct(r.replaced)} of the ${usd(r.takeHomeMonthly)} you take home a month today${r.floorApplied ? ' (plan minimum)' : ''}. Assumes federal tax only, ${fsWord(v)}, paid each month until age ${n(v, 'end')}.${firstChecks(r)}`,
+      rows, example: `Example: age ${n(v, 'age')}, a ${usd(n(v, 'sal'))} salary, ${paidBy(v)}`,
+      note: r.capped ? `The formula gives ${usd(r.formula)}, the maximum cuts it to ${usd(r.gross)}: that maximum sits ${capRank(n(v, 'cap'))} of private plans with a maximum (BLS, the federal statistics office, March 2026).` : `No cost-of-living raise. At ${n(v, 'end')} the checks stop: your own Social Security retirement benefit is what continues.`,
     };
-  }),
+  }), profiles: [
+    { label: `I am ${EX.age}`, set: { age: EX.age } },
+    { label: 'Close to retirement: I am 61', set: { age: 61 } },
+  ] }),
 
   /** Whole long-term claim from the age it starts to the end age of the plan: the question of a reader close to
    *  retirement (naive testers 2026-11-09, the 61-year-old found nothing for her age). */
@@ -196,30 +219,31 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
         ['Take-home pay now, a month', usd(r.takeHomeMonthly)],
       ],
       note: `No cost-of-living raise. The first check comes after the ${elim}-day wait. At ${n(v, 'end')} the checks stop: your own Social Security retirement benefit is what continues, so check your full retirement age on your Social Security statement.`,
-      example: `Example: a claim that starts at ${n(v, 'age')}, a ${usd(n(v, 'sal'))} salary, ${PAID_BY[payerOf(v)]}`,
+      example: `Example: a claim that starts at ${n(v, 'age')}, a ${usd(n(v, 'sal'))} salary, ${paidBy(v)}`,
     };
   }),
 
   /** Short-term disability, a week and in total. */
   std: (arg = {}) => spec([
-    SAL(), PCT('pct', 'Share of pay the plan replaces', PRIVATE.std_median_pct ?? 60),
-    MONEY('cap', 'Weekly maximum benefit', PRIVATE.std_max_weekly_p50 ?? 1000, 'From your plan summary; 0 if none'),
-    NUM('wk', 'Weeks the plan pays you', EX.stdWeeks, 'wk', 52, `Weeks paid after the unpaid days; plans pay up to ${PRIVATE.std_weeks_p50 ?? 26} weeks at the median`),
-    PAYER(), { ...NUM('wait', 'Unpaid days before the plan pays', EX.stdWait, 'days', 180, 'The waiting period of your plan', true), short: 'unpaid days' }, SHARE, FS,
+    SAL(), PAYER(), FS, PCT('pct', 'Share of pay the plan replaces', PRIVATE.std_median_pct ?? 60, PLAN_PCT_HELP(PRIVATE.std_median_pct ?? 60)),
+    MONEY('cap', 'Weekly maximum benefit', PRIVATE.std_max_weekly_p50 ?? 1000, `From your plan summary; 0 if none. No summary? Keep ${usd(PRIVATE.std_max_weekly_p50 ?? 1000)}, the typical maximum`),
+    NUM('wk', 'Weeks you expect to be off and paid', EX.stdWeeks, 'wk', 52, `Not sure? Keep ${EX.stdWeeks}: the time until a long-term plan takes over. Your plan may pay longer, often up to ${PRIVATE.std_weeks_p50 ?? 26} weeks`),
+    { ...NUM('wait', 'Unpaid days before the plan pays', EX.stdWait, 'days', 180, 'The waiting period of your plan', true), short: 'unpaid days' }, SHARE,
   ], arg, (v) => {
     const r = std(stdIn(v, 'pct', 'cap'));
     return {
-      label: 'Short-term disability in your pocket, a week', value: usd(r.netWeekly), sub: `${usd(r.weekly)} a week before tax${r.capped ? ' (weekly maximum)' : ''} · ${r.takeHomeWeekly > 0 ? pct(r.netWeekly / r.takeHomeWeekly) : '0%'} of the ${usd(r.takeHomeWeekly)} you take home a week today`,
-      example: `Example: a ${usd(n(v, 'sal'))} salary, ${n(v, 'wk')} paid weeks, ${PAID_BY[payerOf(v)]}`,
+      label: 'Short-term disability check in your pocket, a week', value: usd(r.netWeekly), sub: `${r.takeHomeWeekly > 0 ? pct(r.netWeekly / r.takeHomeWeekly) : '0%'} of the ${usd(r.takeHomeWeekly)} you take home a week today. Assumes ${n(v, 'wk')} paid weeks after ${n(v, 'wait')} unpaid days, federal tax only, ${fsWord(v)}.`,
+      example: `Example: a ${usd(n(v, 'sal'))} salary, ${n(v, 'wk')} paid weeks, ${paidBy(v)}`,
       rows: [
-        [`Total for the ${n(v, 'wk')} paid weeks, before tax`, usd(r.total), r.total],
+        [`Plan check before tax${r.capped ? ' (weekly maximum)' : ''}, a week`, usd(r.weekly)],
+        [`All ${n(v, 'wk')} paid weeks, before tax`, usd(r.total), r.total],
         ['Federal income tax', usd(r.fed), r.fed],
         ['Payroll tax (Social Security and Medicare)', usd(r.fica), r.fica],
-        ['Total in hand', usd(r.net), r.net],
+        [`All ${n(v, 'wk')} paid weeks, in hand`, usd(r.net), r.net],
         ['Take-home pay now, a week', usd(r.takeHomeWeekly)],
         ['Pay lost in the waiting period', usd(r.unpaidWait)],
       ],
-      note: `You are off ${n(v, 'wait')} unpaid days, then ${n(v, 'wk')} paid weeks. The benefit is ${taxWord(r.share)} because ${payerName(payerOf(v))}; it is taxed on top of your pay for the rest of the year, so a higher salary means a higher tax rate. A plan your employer funds is treated like sick pay: payroll tax (Social Security and Medicare) comes off every check, as from a paycheck. State programs and state income tax are not computed.`,
+      note: `${taxLine(r.share, v)} It is taxed more than a long-term check because it adds to the pay you already earned this year. State programs and state income tax are not included.`,
     };
   }),
 
@@ -227,9 +251,9 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
    *  under the name "federal tax" (audit 2026-11-09). */
   tax: (arg = {}) => spec([
     MONEY('ben', 'Disability benefit, a month', 3000), NUM('mo', 'Monthly checks paid this year', 12, 'mo', 12), PAYER(),
-    MONEY('inc', 'Other taxable income this year', 0, 'Wages before the disability, a spouse’s pay'),
-    NUM('wait', 'Months since you stopped work when the first check arrives', EX_WAIT_MONTHS, 'mo', 12, 'Only used to know which checks still carry payroll tax (Social Security and Medicare): those paid in the first 6 months after you stop work. A 90-day wait is 3'),
-    { ...MONEY('ssdi', 'Disability checks from Social Security, a month', 0, undefined, true), short: 'Social Security disability checks' }, SHARE, FS,
+    FS, MONEY('inc', 'Other taxable income this year', 0, 'Wages you earned this year before stopping, a spouse’s pay. Not sure? Keep 0'),
+    NUM('wait', 'Months off work before the first check', EX_WAIT_MONTHS, 'mo', 12, 'A 90-day wait is 3. Not sure? Keep 3. Payroll tax only falls on checks paid in the first 6 months off'),
+    { ...MONEY('ssdi', 'Disability checks from Social Security, a month', 0, undefined, true), short: 'Social Security disability checks' }, SHARE,
   ], arg, (v) => {
     const ben = n(v, 'ben'), m = n(v, 'mo'), p = payerOf(v), sh = taxableShare(p, shareOf(v)), st = fsOf(v), inc = n(v, 'inc');
     const year = ben * m, taxable = year * sh, ss = n(v, 'ssdi') * m;
@@ -239,18 +263,18 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
     const fica = sickPayFica(ben, sh, ficaM, p);
     return {
       // The rows show the subtraction itself (testers 2026-11-09: 12 × $2,822 did not give $33,171, "tax added to what?").
-      label: `You keep over ${m === 1 ? 'one monthly check' : `${m} monthly checks`}, after tax`, value: usd(keep(year, fed, fica)), sub: `${usd(year)} of checks − ${usd(fed)} income tax − ${usd(fica)} payroll tax · ${taxWord(sh)}`,
-      example: `Example: ${m} checks of ${usd(ben)}, no other income, ${PAID_BY[p]}`,
+      label: `You keep over ${m === 1 ? 'one monthly check' : `${m} monthly checks`}, after tax`, value: usd(keep(year, fed, fica)), sub: `${m === 1 ? 'One check' : `${m} checks`} of ${usd(ben)}, after federal income tax and payroll tax. Assumes ${fsWord(v)}, federal tax only; the benefit is ${taxWord(sh)}.`,
+      example: `Example: ${m} checks of ${usd(ben)}, no other income, ${paidBy(v)}`,
       rows: [
         [`Benefit received, ${m === 1 ? 'one check' : `${m} checks`}`, usd(year), year],
         ['Federal income tax on it', usd(fed), fed],
         [`Payroll tax (Social Security and Medicare), ${ficaM === 1 ? 'first check' : `first ${ficaM} checks`} only`, usd(fica), fica],
-        ['Part counted as income', usd(taxable), taxable],
+        ...(taxable > 0 && taxable < year ? [['Part counted as income', usd(taxable)] as [string, string]] : []),
         ...(ss > 0 ? [['Taxable part of Social Security', usd(ssT)] as [string, string]] : []),
       ],
       table: { caption: 'The same benefit under each way of paying for it, this year', headers: ['Premium paid by', 'Taxable', 'Income tax', 'Payroll tax', 'You keep'], align: ['l', 'r', 'r', 'r', 'r'],
         rows: PAYERS.map((x) => { const sh2 = taxableShare(x.value, shareOf(v)); const it = taxAdded(year * sh2 + ssTaxable(ss, inc + year * sh2, st), inc, st); const fc = sickPayFica(ben, sh2, ficaM, x.value); return [payerRow(x.value, shareOf(v)), usd(year * sh2), usd(it), usd(fc), usd(keep(year, it, fc))]; }) },
-      note: `Federal income tax with the 2026 brackets and standard deduction, no credit. Payroll tax (Social Security and Medicare) applies only to checks paid within 6 calendar months of your last month of work: here the first ${ficaM}. State income tax is not included.`,
+      note: `Payroll tax only falls on checks paid in the first 6 months after you stop work: here the first ${ficaM}. State income tax is not included.`,
     };
   }),
 
@@ -268,22 +292,22 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
       example: `Example: a ${usd(n(v, 'sal'))} salary, a ${usd(n(v, 'prem'))} yearly premium, a ${usd(n(v, 'ben'))} monthly benefit`,
       rows: [
         ['Tax saved each year by paying pre-tax', usd(r.extraYearly)],
-        [`Tax on a ${n(v, 'mo')}-month claim, premium paid pre-tax`, usd(r.taxOnClaim), r.taxOnClaim],
-        [`Benefits over a ${n(v, 'mo')}-month claim`, usd(r.claim), r.claim],
         ['Income tax on them, premium paid pre-tax', usd(r.incomeTaxOnClaim), r.incomeTaxOnClaim],
         ['Payroll tax (Social Security and Medicare) on the first checks', usd(r.ficaOnClaim), r.ficaOnClaim],
+        [`Total tax on a ${n(v, 'mo')}-month claim, premium paid pre-tax`, usd(r.taxOnClaim), r.taxOnClaim],
+        [`Benefits over a ${n(v, 'mo')}-month claim`, usd(r.claim), r.claim],
         ['Premium paid after tax, a year', usd(r.afterTaxCost)],
         ['Same premium paid pre-tax, real cost', usd(r.preTaxCost)],
         ['Your top federal tax rate', pct(r.marginal)],
       ],
-      note: `After-tax premiums make the benefit tax-free (IRS Pub. 525). The claim is tested with no other income that year and a ${EX.elimDays}-day wait; with other income the tax is higher.`,
+      note: `After-tax premiums make the benefit tax-free (IRS, the federal tax agency). The claim is tested with no other income that year and a ${EX.elimDays}-day wait; with other income the tax is higher.`,
     };
   }),
 
   /** What a quoted premium costs against what it can pay. No price is assumed: the reader enters the quote. */
   cost: (arg = {}) => spec([
     MONEY('prem', 'Monthly premium on your quote', 120, 'An example, not a market rate: type the premium on your quote'), MONEY('ben', 'Monthly benefit it buys', 4000, 'From the same quote'), SAL(),
-    NUM('yrs', 'Years you expect to pay it', 25, 'yr', 50, 'Until the policy ends, often at 65'), PAYER('own', 'A quote you got yourself is an individual policy; pick a group line for a plan at work'), FS,
+    NUM('yrs', 'Years you expect to pay it', 25, 'yr', 50, 'Until the policy ends, often at 65: bought at 40, that is 25 years'), PAYER('own', 'A quote you got yourself is an individual policy; pick a group line for a plan at work'), FS,
   ], arg, (v) => {
     const prem = n(v, 'prem'), ben = n(v, 'ben'), sal = n(v, 'sal'), yrs = n(v, 'yrs'), p = payerOf(v), st = fsOf(v);
     const paid = prem * 12 * yrs;
@@ -292,7 +316,7 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
     const pre = p === 'pretax' ? prem * 12 * (marginalRate(sal, st) + FED.socialSecurityRate + FED.medicareRate) : 0;
     const back = netBen > 0 ? Math.ceil((paid - pre * yrs) / netBen) : 0;
     return {
-      label: 'Months of benefits that pay back all the premiums', value: mo(back), sub: `${mo(back)} of benefits pay back ${yr(yrs)} of premiums, ${usd(paid)} in all`,
+      label: 'Months of benefits that pay back all the premiums', value: mo(back), sub: `A claim of ${mo(back)} returns all you paid: ${yr(yrs)} of premiums, ${usd(paid)}. Assumes the quote's price never rises.`,
       example: `Example quote, not a market rate: ${usd(prem)} a month for a ${usd(ben)} monthly benefit`,
       rows: [
         ['Premium as a share of salary', sal > 0 ? pct(prem * 12 / sal, 1) : '0%'],
@@ -362,7 +386,7 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
     return {
       label: 'Extra benefit to buy, a month (paid to you tax-free)', value: usd(missing),
       sub: `This is the benefit, not the price: ${usd(n(v, 'need'))} you need, minus ${usd(group)} from your plan at work after federal income tax`,
-      example: n(v, 'pct') > 0 ? `Example: ${usd(n(v, 'need'))} needed a month, a ${usd(n(v, 'sal'))} salary, ${PAID_BY[payerOf(v)]}` : `Example: ${usd(n(v, 'need'))} needed a month, no plan at work`,
+      example: n(v, 'pct') > 0 ? `Example: ${usd(n(v, 'need'))} needed a month, a ${usd(n(v, 'sal'))} salary, ${paidBy(v)}` : `Example: ${usd(n(v, 'need'))} needed a month, no plan at work`,
       rows: [['Money you need each month, after tax', usd(n(v, 'need')), n(v, 'need')], ['Other money that keeps coming', usd(n(v, 'oth')), n(v, 'oth')], ['Your plan at work, after federal income tax', usd(group), group], ['Still missing, after tax', usd(missing), missing]],
       note: 'A policy you buy with your own money pays tax-free, so the amount still missing is the benefit to ask for. Insurers cap how much they issue against your income.',
     };
@@ -379,11 +403,11 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
     const f = (x: number | null) => (x === null ? 'not published' : `${formatNumber(x, 0)}%`);
     const same = GROUPS.filter((x) => x.kind === g.kind);
     return {
-      label: `Workers offered long-term disability: ${groupLabel(g.label)}`, value: f(g.ltd), sub: `short-term disability ${f(g.std)} · long-term care ${f(g.ltc)}`,
-      example: `National survey figure for ${g.label.toLowerCase()}, not your own plan: pick your type of employer`,
-      rows: [['All civilian workers, long-term disability', f(GROUPS[0].ltd)], ['Median private plan, a week (short term)', usd(stdW)], ['Median private plan, a month (long term)', usd(ltdM)]],
+      label: `Share of workers whose employer offers long-term disability: ${groupLabel(g.label)}`, value: f(g.ltd), sub: `Offered, paid or not, in March 2026. Short-term disability: ${f(g.std)} of the same workers.`,
+      example: `National survey figure for ${g.label.toLowerCase()}, not your own plan`, exampleAide: 'pick another type of employer to compare',
+      rows: [['All civilian workers, long-term disability', f(GROUPS[0].ltd)], ['Long-term care insurance offered', f(g.ltc)], ['Median private plan, before tax, a week (short term)', usd(stdW)], ['Median private plan, before tax, a month (long term)', usd(ltdM)]],
       table: { caption: 'Share of workers with access, March 2026 (Bureau of Labor Statistics)', headers: ['Group', 'Short-term', 'Long-term', 'Long-term care'], rows: same.map((x) => [groupLabel(x.label), f(x.std), f(x.ltd), f(x.ltc)]), align: ['l', 'r', 'r', 'r'] },
-      note: 'Median private plan: 60% of pay up to the median maximum, for workers whose plan pays a fixed share. Access means the employer offers the plan, paid or not.',
+      note: 'Median private plan: 60% of pay, up to the usual monthly or weekly maximum.',
     };
   }),
 
@@ -397,14 +421,14 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
     return {
       label: 'Benefit as a share of your profit', value: inc > 0 ? pct(ben * 12 / inc) : '0%', example: `Example: ${usd(inc)} of profit, a ${usd(ben)} monthly benefit for ${usd(prem)} a month`, sub: `${usd(ben)} a month, tax-free, against ${usd(after / 12)} a month of profit after income tax`,
       rows: [['Premium as a share of profit', inc > 0 ? pct(prem * 12 / inc, 1) : '0%'], ['Taxable benefit that would equal it', usd(eq)], ['Premiums over 10 years', usd(prem * 120)], ['Months of benefit that repay 10 years', ben > 0 ? formatNumber(Math.ceil(prem * 120 / ben), 0) : '0']],
-      note: 'Profit after federal income tax with the standard deduction, no credit; self-employment tax and state tax are not subtracted. A benefit bought with your own money is tax-free (IRS Pub. 525).',
+      note: 'Profit after federal income tax with the standard deduction, no credit; self-employment tax and state tax are not subtracted. A benefit bought with your own money is tax-free (IRS rules).',
     };
   }),
 
   /** Long-term care premium deduction (2026 limits by age). */
   ltcded: (arg = {}) => spec([
     NUM('age', 'Your age at the end of 2026', 62, 'yr', 110), MONEY('prem', 'Long-term care premium paid in 2026', 3000), MONEY('inc', 'Adjusted gross income', 80000),
-    { kind: 'select', id: 'path', label: 'How you would deduct it', def: 'itemize', options: [{ value: 'itemize', label: 'Itemized medical expenses' }, { value: 'self', label: 'Self-employed health insurance deduction' }, { value: 'hsa', label: 'Paid from an HSA' }] },
+    { kind: 'select', id: 'path', label: 'How you would deduct it', def: 'itemize', options: [{ value: 'itemize', label: 'Itemized medical expenses' }, { value: 'self', label: 'Self-employed health insurance deduction' }, { value: 'hsa', label: 'Paid from a health savings account (HSA)' }] },
     MONEY('med', 'Other medical expenses this year', 0, undefined, true), MONEY('oth', 'Other itemized deductions (mortgage interest, taxes, gifts)', 0, undefined, true),
     MONEY('se', 'Net profit of the business', 80000, 'Self-employed deduction only', true), FS,
   ], arg, (v) => {
@@ -417,9 +441,9 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
         ...(path === 'itemize' ? [[`Medical costs below 7.5% of your ${usd(n(v, 'inc'))} income, not deductible`, usd(r.floor)], ['Itemizing beats the standard deduction', r.itemizes ? 'yes' : 'no']] as Array<[string, string]> : []),
         ['Your top federal tax rate', pct(r.marginal)],
       ],
-      table: { caption: 'Deductible long-term care premium by age, 2025 and 2026 (Rev. Proc. 2024-40 and 2025-32)', headers: ['Age at the end of the year', '2025', '2026'], align: ['l', 'r', 'r'],
+      table: { caption: 'Deductible long-term care premium by age, 2025 and 2026 (IRS limits)', headers: ['Age at the end of the year', '2025', '2026'], align: ['l', 'r', 'r'],
         rows: [['40 or under', 40], ['41 to 50', 50], ['51 to 60', 60], ['61 to 70', 70], ['71 or over', 71]].map(([l, a]) => [String(l), usd(ltcLimit(Number(a), 2025)), usd(ltcLimit(Number(a)))]) },
-      note: path === 'hsa' ? 'An HSA can pay a qualified long-term care premium up to the age limit tax-free; the saving shown is the tax on that money at your marginal rate.' : 'Only a qualified (tax-qualified) long-term care contract counts. Federal income tax only.',
+      note: path === 'hsa' ? 'A health savings account (HSA) can pay a qualified long-term care premium up to the age limit tax-free; the saving shown is the tax on that money at your marginal rate.' : 'Only a qualified (tax-qualified) long-term care contract counts. Federal income tax only.',
     };
   }),
 
@@ -465,16 +489,16 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
 
   /** AD&D: the schedule. */
   add: (arg = {}) => spec([
-    MONEY('face', 'Principal sum (the AD&D amount)', 100000),
+    MONEY('face', 'Principal sum (the amount the accidental death and dismemberment policy names)', 100000),
     { kind: 'select', id: 'loss', label: 'What the accident caused', def: 'one', options: [{ value: 'death', label: 'Death' }, { value: 'one', label: 'Loss of one hand, foot or eye' }, { value: 'two', label: 'Two or more of these losses' }, { value: 'onethendeath', label: 'One loss, then death from the same accident' }] },
   ], arg, (v) => {
     const face = n(v, 'face'), l = s(v, 'loss');
     const losses: AddLoss[] = l === 'onethendeath' ? ['one', 'death'] : [l as AddLoss];
     const pay = addPayout(face, losses);
     return {
-      label: 'Payment under the FEGLI-style schedule', value: usd(pay), example: `Example: a ${usd(face)} principal sum`, sub: `${face > 0 ? pct(pay / face) : '0%'} of the principal sum`,
+      label: 'Payment under the federal employees’ schedule', value: usd(pay), example: `Example: a ${usd(face)} principal sum`, sub: `${face > 0 ? pct(pay / face) : '0%'} of the principal sum`,
       rows: [['Death', usd(face * 1)], ['One hand, foot or eye', usd(face * 0.5)], ['Two or more', usd(face * 1)], ['Most for one accident', usd(face)]],
-      note: 'Schedule of the federal employees’ plan (OPM). Private policies print their own schedule, often with more lines; read yours. Death from illness pays nothing under AD&D.',
+      note: 'Schedule of the federal employees’ plan, run by the Office of Personnel Management. Private policies print their own schedule, often with more lines; read yours. Death from illness pays nothing under AD&D.',
     };
   }),
 
@@ -487,7 +511,7 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
     return {
       label: 'Share of your worst-case medical bill it covers', value: pct(r.oopShare), example: `Example: a ${usd(n(v, 'pay'))} payment and a ${usd(n(v, 'prem'))} yearly premium`, sub: `${usd(r.gapCovered)} of ${usd(n(v, 'oop'))} out of pocket`,
       rows: [['Share of the deductible', pct(r.deductibleShare)], ['Left for other bills', usd(r.leftOver)], ['Still yours after the payment', usd(r.unpaidAfter)], ['Years of premium the payment equals', formatNumber(r.yearsOfPremium, 1)]],
-      note: `Defaults: the 2026 floor deductible (${usd(HSA.hdhpMinDeductible.self)}) and ceiling on out-of-pocket costs (${usd(HSA.hdhpMaxOutOfPocket.self)}) of an HSA plan, self-only. Enter your own plan’s figures.`,
+      note: `Defaults: the 2026 floor deductible (${usd(HSA.hdhpMinDeductible.self)}) and ceiling on out-of-pocket costs (${usd(HSA.hdhpMaxOutOfPocket.self)}) of a health plan that allows a health savings account (HSA), self-only. Enter your own plan’s figures.`,
     };
   }),
 

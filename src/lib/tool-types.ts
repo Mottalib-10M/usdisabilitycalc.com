@@ -12,5 +12,9 @@ export interface ToolOut {
   /** What the example case assumes, in plain words ("Example: a $60,000 salary, plan paid by your employer"), shown
    *  while the reader has changed nothing (brief of 2026-11-09, second pass: never a vague "Example"). */
   example?: string;
+  /** Replaces the generic "change a figure to see yours" after the example (a survey figure is never "yours"). */
+  exampleAide?: string;
 }
-export interface ToolSpec { inputs: Input[]; run: (v: V) => ToolOut }
+/** A door by profile (brief of 2026-11-10, rule 2): a button above the fields that sets a few of them at once. */
+export interface Profile { label: string; set: V }
+export interface ToolSpec { inputs: Input[]; run: (v: V) => ToolOut; profiles?: Profile[] }
