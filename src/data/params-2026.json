@@ -20,18 +20,37 @@
     "socialSecurityBenefitAdjustedBase": { "single": 34000, "mfj": 44000, "hoh": 34000 },
     "medicalExpenseFloor": 0.075
   },
+  "federal2027": {
+    "_doc": "Rev. Proc. 2026-35 §3.01 (barèmes) et §3.15 (déduction standard), années commençant en 2027, PDF irs.gov lu par curl le 2026-11-23. Base sociale 2027 : SSA, Federal Register 91 FR 67380 du 26 octobre 2026. Les autres valeurs de « federal » (taux, seuils de la part imposable des prestations, plancher médical) ne sont pas indexées et restent celles de 2026.",
+    "standardDeduction": { "single": 16600, "mfj": 33200, "hoh": 24925 },
+    "brackets": {
+      "single": [[12800, 0.1], [52025, 0.12], [109125, 0.22], [208325, 0.24], [264550, 0.32], [661375, 0.35], [null, 0.37]],
+      "mfj": [[25600, 0.1], [104050, 0.12], [218250, 0.22], [416650, 0.24], [529100, 0.32], [793650, 0.35], [null, 0.37]],
+      "hoh": [[18250, 0.1], [69650, 0.12], [109100, 0.22], [208300, 0.24], [264550, 0.32], [661350, 0.35], [null, 0.37]]
+    },
+    "socialSecurityWageBase": 192300
+  },
   "ltc": {
     "_doc": "Rev. Proc. 2025-32 §4.27 (213(d)(10)) et §4.62 (7702B(d)(4)) pour 2026 ; Rev. Proc. 2024-40 §3.28 et §3.62 pour 2025. Âge atteint à la fin de l'année fiscale ; borne haute incluse.",
     "premiumLimits2026": [[40, 500], [50, 930], [60, 1860], [70, 4960], [null, 6200]],
     "premiumLimits2025": [[40, 480], [50, 900], [60, 1800], [70, 4810], [null, 6020]],
     "perDiem2026": 430,
-    "perDiem2025": 420
+    "perDiem2025": 420,
+    "premiumLimits2027": [[40, 500], [50, 945], [60, 1890], [70, 5030], [null, 6290]],
+    "perDiem2027": 445,
+    "_doc2027": "Rev. Proc. 2026-35 §3.29 (213(d)(10)) et §3.67 (7702B(d)(4)) pour 2027, PDF irs.gov lu par curl le 2026-11-23."
   },
   "hsa": {
     "_doc": "Rev. Proc. 2025-19 §2.01, année civile 2026.",
     "contribution": { "self": 4400, "family": 8750 },
     "hdhpMinDeductible": { "self": 1700, "family": 3400 },
     "hdhpMaxOutOfPocket": { "self": 8500, "family": 17000 }
+  },
+  "hsa2027": {
+    "_doc": "Rev. Proc. 2026-24 §3.01, année civile 2027, PDF irs.gov lu par curl le 2026-11-23.",
+    "contribution": { "self": 4500, "family": 9000 },
+    "hdhpMinDeductible": { "self": 1750, "family": 3500 },
+    "hdhpMaxOutOfPocket": { "self": 8700, "family": 17400 }
   },
   "fegliADD": {
     "_doc": "OPM, FEGLI Handbook, Accidental death and dismemberment : décès = BIA ; perte d'une main, d'un pied ou de la vue d'un œil = moitié du BIA ; deux pertes ou plus dans le même accident = BIA entier ; total d'un accident plafonné au BIA. Exemple d'Ileana (BIA 42 000 $) repris en test.",
@@ -41,6 +60,9 @@
     "capPerAccident": 1
   },
   "sources": {
+    "irs_rp_2026_35": { "url": "https://www.irs.gov/pub/irs-drop/rp-26-35.pdf", "label": { "en": "IRS, Revenue Procedure 2026-35: 2027 tax brackets, standard deduction, long-term care premium limits and per diem" } },
+    "irs_rp_2026_24": { "url": "https://www.irs.gov/pub/irs-drop/rp-26-24.pdf", "label": { "en": "IRS, Revenue Procedure 2026-24: 2027 HSA and high deductible health plan limits" } },
+    "ssa_fr_2027": { "url": "https://www.federalregister.gov/documents/2026/10/26/2026-21796/cost-of-living-increase-and-other-determinations-for-2027", "label": { "en": "Social Security Administration, Cost-of-Living Increase and Other Determinations for 2027 (Federal Register, October 26, 2026)" } },
     "irs_rp_2025_32": { "url": "https://www.irs.gov/pub/irs-drop/rp-25-32.pdf", "label": { "en": "IRS, Revenue Procedure 2025-32: 2026 tax brackets, standard deduction, long-term care premium limits and per diem" } },
     "irs_rp_2024_40": { "url": "https://www.irs.gov/pub/irs-drop/rp-24-40.pdf", "label": { "en": "IRS, Revenue Procedure 2024-40: the same limits for 2025" } },
     "irs_rp_2025_19": { "url": "https://www.irs.gov/pub/irs-drop/rp-25-19.pdf", "label": { "en": "IRS, Revenue Procedure 2025-19: 2026 HSA and high deductible health plan limits" } },

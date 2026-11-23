@@ -28,10 +28,14 @@ export const GOVERNMENT = B.provisions.government;
 
 const r2 = (x: number) => Math.round(x * 100) / 100;
 
+/** Tax year of the income-tax figures: 2026 (default) or 2027 (Rev. Proc. 2026-35; unindexed values carried over). */
+export type Year = 2026 | 2027;
+const fedOf = (y: Year = 2026) => (y === 2027 ? { ...FED, ...P.federal2027 } : FED);
+
 /** Federal income tax on taxable income (after deductions). */
-export function bracketTax(taxable: number, st: Status): number {
+export function bracketTax(taxable: number, st: Status, y: Year = 2026): number {
   let tax = 0, low = 0;
-  for (const [top, rate] of FED.brackets[st] as Array<[number | null, number]>) {
+  for (const [top, rate] of fedOf(y).brackets[st] as Array<[number | null, number]>) {
     const hi = top ?? Infinity;
     if (taxable > low) tax += (Math.min(taxable, hi) - low) * rate;
     if (taxable <= hi) break;
@@ -40,14 +44,15 @@ export function bracketTax(taxable: number, st: Status): number {
   return r2(tax);
 }
 /** Tax on gross income with the standard deduction. */
-export const taxOn = (gross: number, st: Status) => bracketTax(Math.max(0, gross - FED.standardDeduction[st]), st);
+export const taxOn = (gross: number, st: Status, y: Year = 2026) => bracketTax(Math.max(0, gross - fedOf(y).standardDeduction[st]), st, y);
 /** Tax that an extra taxable amount adds on top of other income. */
 export const taxAdded = (extra: number, other: number, st: Status) => r2(taxOn(other + Math.max(0, extra), st) - taxOn(other, st));
 /** Marginal federal rate at a gross income (next dollar). */
-export function marginalRate(gross: number, st: Status): number {
-  const t = Math.max(0, gross - FED.standardDeduction[st]);
-  if (gross <= FED.standardDeduction[st]) return 0;
-  for (const [top, rate] of FED.brackets[st] as Array<[number | null, number]>) if (top === null || t < top) return rate;
+export function marginalRate(gross: number, st: Status, y: Year = 2026): number {
+  const F = fedOf(y);
+  const t = Math.max(0, gross - F.standardDeduction[st]);
+  if (gross <= F.standardDeduction[st]) return 0;
+  for (const [top, rate] of F.brackets[st] as Array<[number | null, number]>) if (top === null || t < top) return rate;
   return 0.37;
 }
 /** Employee Social Security and Medicare on wages (no Additional Medicare Tax). */
@@ -205,37 +210,38 @@ export function benefitNeeded(x: { need: number; otherMonthly: number; payer: Pa
 }
 
 /* ------------------------------------------------------------------ Long-term care: premium limit and deduction */
-export function ltcLimit(age: number, year: 2025 | 2026 = 2026): number {
-  const t = (year === 2026 ? LTC.premiumLimits2026 : LTC.premiumLimits2025) as Array<[number | null, number]>;
+export function ltcLimit(age: number, year: 2025 | 2026 | 2027 = 2026): number {
+  const t = (year === 2027 ? LTC.premiumLimits2027 : year === 2026 ? LTC.premiumLimits2026 : LTC.premiumLimits2025) as Array<[number | null, number]>;
   for (const [top, v] of t) if (top === null || age <= top) return v;
   return 0;
 }
-export interface LtcDedIn { age: number; premium: number; income: number; otherMedical: number; otherItemized: number; st: Status; path: 'itemize' | 'self' | 'hsa'; seProfit: number }
+export interface LtcDedIn { age: number; premium: number; income: number; otherMedical: number; otherItemized: number; st: Status; path: 'itemize' | 'self' | 'hsa'; seProfit: number; year?: Year }
 export function ltcDeduction(x: LtcDedIn) {
-  const limit = ltcLimit(x.age);
+  const y = x.year ?? 2026;
+  const limit = ltcLimit(x.age, y);
   const eligible = Math.min(x.premium, limit);
-  const m = marginalRate(x.income, x.st);
+  const m = marginalRate(x.income, x.st, y);
   if (x.path === 'self') {
     const ded = Math.min(eligible, Math.max(0, x.seProfit));
-    const saved = r2(taxOn(x.income, x.st) - taxOn(x.income - ded, x.st));
+    const saved = r2(taxOn(x.income, x.st, y) - taxOn(x.income - ded, x.st, y));
     return { limit, eligible, counted: ded, saved, floor: 0, itemizes: false, marginal: m };
   }
   if (x.path === 'hsa') {
     return { limit, eligible, counted: eligible, saved: r2(eligible * m), floor: 0, itemizes: false, marginal: m };
   }
   const floor = r2(x.income * FED.medicalExpenseFloor);
-  const std0 = FED.standardDeduction[x.st];
+  const std0 = fedOf(y).standardDeduction[x.st];
   const itemized = (med: number) => Math.max(0, med - floor) + x.otherItemized;
-  const taxWith = (med: number) => bracketTax(Math.max(0, x.income - Math.max(std0, itemized(med))), x.st);
+  const taxWith = (med: number) => bracketTax(Math.max(0, x.income - Math.max(std0, itemized(med))), x.st, y);
   const saved = r2(taxWith(x.otherMedical) - taxWith(x.otherMedical + eligible));
   const counted = r2(Math.max(0, x.otherMedical + eligible - floor) - Math.max(0, x.otherMedical - floor));
   return { limit, eligible, counted, saved, floor, itemizes: itemized(x.otherMedical + eligible) > std0, marginal: m };
 }
 
 /* ------------------------------------------------------------------ Long-term care: per diem exclusion (Pub. 525, Form 8853) */
-export function perDiem(x: { daily: number; days: number; costs: number; reimbursed: number }) {
+export function perDiem(x: { daily: number; days: number; costs: number; reimbursed: number; year?: Year }) {
   const paid = x.daily * x.days;
-  const limitTotal = LTC.perDiem2026 * x.days;
+  const limitTotal = (x.year === 2027 ? LTC.perDiem2027 : LTC.perDiem2026) * x.days;
   const excludable = Math.max(0, Math.max(limitTotal, x.costs) - x.reimbursed);
   const taxable = Math.max(0, paid - excludable);
   return { paid: r2(paid), limitTotal: r2(limitTotal), excludable: r2(excludable), taxable: r2(taxable) };

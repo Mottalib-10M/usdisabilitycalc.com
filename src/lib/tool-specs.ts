@@ -16,6 +16,9 @@ export const usd = (x: number) => `${x < -0.5 ? '-' : ''}${formatMoney(Math.abs(
 export const pct = (x: number, d = 0) => formatPercent(x, d);
 const n = (v: V, k: string) => Number(v[k]) || 0;
 const s = (v: V, k: string) => String(v[k]);
+/** Tax year of a long-term care calculator: 2026 by default, 2027 on the 2027 page (Rev. Proc. 2026-35). */
+const YEAR = (def: string): Input => ({ kind: 'choice', id: 'yr', label: 'Tax year', short: 'tax year', def, options: [{ value: '2026', label: '2026' }, { value: '2027', label: '2027' }] });
+const yearOf = (v: V): 2026 | 2027 => (s(v, 'yr') === '2027' ? 2027 : 2026);
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 export const longDate = (iso: string) => `${MONTHS[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}, ${iso.slice(0, 4)}`;
 const mo = (x: number) => `${formatNumber(x, Number.isInteger(x) ? 0 : 1)} month${x === 1 ? '' : 's'}`;
@@ -426,39 +429,41 @@ const SPECS: Record<string, (arg?: Arg) => ToolSpec> = {
   }),
 
   /** Long-term care premium deduction (2026 limits by age). */
-  ltcded: (arg = {}) => spec([
-    NUM('age', 'Your age at the end of 2026', 62, 'yr', 110), MONEY('prem', 'Long-term care premium paid in 2026', 3000), MONEY('inc', 'Adjusted gross income', 80000),
+  ltcded: (arg = {}) => { const Y = String(arg.yr ?? '2026'); return spec([
+    NUM('age', `Your age at the end of ${Y}`, 62, 'yr', 110), MONEY('prem', `Long-term care premium paid in ${Y}`, 3000), MONEY('inc', 'Adjusted gross income', 80000),
     { kind: 'select', id: 'path', label: 'How you would deduct it', def: 'itemize', options: [{ value: 'itemize', label: 'Itemized medical expenses' }, { value: 'self', label: 'Self-employed health insurance deduction' }, { value: 'hsa', label: 'Paid from a health savings account (HSA)' }] },
     MONEY('med', 'Other medical expenses this year', 0, undefined, true), MONEY('oth', 'Other itemized deductions (mortgage interest, taxes, gifts)', 0, undefined, true),
-    MONEY('se', 'Net profit of the business', 80000, 'Self-employed deduction only', true), FS,
+    MONEY('se', 'Net profit of the business', 80000, 'Self-employed deduction only', true), FS, YEAR(Y),
   ], arg, (v) => {
     const path = s(v, 'path') as 'itemize' | 'self' | 'hsa';
-    const r = ltcDeduction({ age: n(v, 'age'), premium: n(v, 'prem'), income: n(v, 'inc'), otherMedical: n(v, 'med'), otherItemized: n(v, 'oth'), st: fsOf(v), path, seProfit: n(v, 'se') });
+    const y = yearOf(v);
+    const r = ltcDeduction({ age: n(v, 'age'), premium: n(v, 'prem'), income: n(v, 'inc'), otherMedical: n(v, 'med'), otherItemized: n(v, 'oth'), st: fsOf(v), path, seProfit: n(v, 'se'), year: y });
     return {
       label: 'Federal tax saved by the premium', value: usd(r.saved), example: `Example: age ${n(v, 'age')}, a ${usd(n(v, 'prem'))} premium, ${usd(n(v, 'inc'))} of income`, sub: `${usd(r.eligible)} of the premium counts, limit ${usd(r.limit)} at age ${n(v, 'age')}`,
       rows: [
-        ['2026 limit for your age', usd(r.limit)], ['Premium that counts', usd(r.eligible), r.eligible],
+        [`${y} limit for your age`, usd(r.limit)], ['Premium that counts', usd(r.eligible), r.eligible],
         ...(path === 'itemize' ? [[`Medical costs below 7.5% of your ${usd(n(v, 'inc'))} income, not deductible`, usd(r.floor)], ['Itemizing beats the standard deduction', r.itemizes ? 'yes' : 'no']] as Array<[string, string]> : []),
         ['Your top federal tax rate', pct(r.marginal)],
       ],
-      table: { caption: 'Deductible long-term care premium by age, 2025 and 2026 (IRS limits)', headers: ['Age at the end of the year', '2025', '2026'], align: ['l', 'r', 'r'],
-        rows: [['40 or under', 40], ['41 to 50', 50], ['51 to 60', 60], ['61 to 70', 70], ['71 or over', 71]].map(([l, a]) => [String(l), usd(ltcLimit(Number(a), 2025)), usd(ltcLimit(Number(a)))]) },
-      note: path === 'hsa' ? 'A health savings account (HSA) can pay a qualified long-term care premium up to the age limit tax-free; the saving shown is the tax on that money at your marginal rate.' : 'Only a qualified (tax-qualified) long-term care contract counts. Federal income tax only.',
+      table: { caption: 'Deductible long-term care premium by age, 2025 to 2027 (IRS limits)', headers: ['Age at the end of the year', '2025', '2026', '2027'], align: ['l', 'r', 'r', 'r'],
+        rows: [['40 or under', 40], ['41 to 50', 50], ['51 to 60', 60], ['61 to 70', 70], ['71 or over', 71]].map(([l, a]) => [String(l), usd(ltcLimit(Number(a), 2025)), usd(ltcLimit(Number(a))), usd(ltcLimit(Number(a), 2027))]) },
+      note: path === 'hsa' ? 'A health savings account (HSA) can pay a qualified long-term care premium up to the age limit tax-free; the saving shown is the tax on that money at your marginal rate.' : `Only a qualified (tax-qualified) long-term care contract counts. Federal income tax only, with the ${y} brackets and standard deduction.`,
     };
-  }),
+  }); },
 
   /** Long-term care benefits: the per diem exclusion. */
-  perdiem: (arg = {}) => spec([
-    MONEY('day', 'Benefit paid per day, flat (per diem)', 500), NUM('days', 'Days paid in 2026', 365, 'days', 366),
-    MONEY('cost', 'Care costs you paid for those days', 120000), MONEY('reimb', 'Part of those costs already reimbursed', 0, 'By Medicare or another policy', true),
+  perdiem: (arg = {}) => { const Y = String(arg.yr ?? '2026'); return spec([
+    MONEY('day', 'Benefit paid per day, flat (per diem)', 500), NUM('days', `Days paid in ${Y}`, 365, 'days', 366),
+    MONEY('cost', 'Care costs you paid for those days', 120000), MONEY('reimb', 'Part of those costs already reimbursed', 0, 'By Medicare or another policy', true), YEAR(Y),
   ], arg, (v) => {
-    const r = perDiem({ daily: n(v, 'day'), days: n(v, 'days'), costs: n(v, 'cost'), reimbursed: n(v, 'reimb') });
+    const y = yearOf(v);
+    const r = perDiem({ daily: n(v, 'day'), days: n(v, 'days'), costs: n(v, 'cost'), reimbursed: n(v, 'reimb'), year: y });
     return {
       label: 'Taxable part of the benefits', value: usd(r.taxable), example: `Example: ${usd(n(v, 'day'))} a day for ${n(v, 'days')} days, ${usd(n(v, 'cost'))} of care costs`, sub: `${usd(r.paid)} paid · ${usd(r.excludable)} excluded`,
-      rows: [['Paid by the policy', usd(r.paid), r.paid], [`2026 limit: ${usd(LTC.perDiem2026)} a day`, usd(r.limitTotal), r.limitTotal], ['Excluded from income', usd(r.excludable), r.excludable], ['Reported as income', usd(r.taxable), r.taxable]],
+      rows: [['Paid by the policy', usd(r.paid), r.paid], [`${y} limit: ${usd(y === 2027 ? LTC.perDiem2027 : LTC.perDiem2026)} a day`, usd(r.limitTotal), r.limitTotal], ['Excluded from income', usd(r.excludable), r.excludable], ['Reported as income', usd(r.taxable), r.taxable]],
       note: 'Form 8853 compares the benefits with the larger of the daily limit and the actual costs, minus reimbursements. A policy that reimburses actual costs is not taxed this way.',
     };
-  }),
+  }); },
 
   /** Long-term care: what a premium buys, with or without inflation protection. */
   ltcpool: (arg = {}) => spec([

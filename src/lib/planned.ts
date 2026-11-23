@@ -6,7 +6,7 @@ export const PLANNED_GUIDES = [
   'elimination-period', 'ltd-social-security-offset', 'disability-insurance-by-employer', 'how-much-disability-insurance-do-i-need',
   'disability-insurance-self-employed',
   'long-term-care-insurance-tax-deduction', 'long-term-care-insurance-benefits-taxable', 'long-term-care-insurance-cost',
-  'hybrid-long-term-care-insurance',
+  'hybrid-long-term-care-insurance', 'long-term-care-tax-limits-2027',
   'accidental-death-and-dismemberment-insurance', 'accident-insurance', 'hospital-indemnity-insurance', 'critical-illness-insurance',
 ];
 export const PLANNED_IDS = new Set<string>(PLANNED_GUIDES);

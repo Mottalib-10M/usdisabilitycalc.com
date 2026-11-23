@@ -35,14 +35,14 @@ describe('content files', () => {
       it('title 50-60, key term first, year, unique', () => {
         expect(x.title.length, x.title).toBeGreaterThanOrEqual(50);
         expect(x.title.length, x.title).toBeLessThanOrEqual(60);
-        expect(x.title).toMatch(/2026/);
+        expect(x.title).toMatch(/202[67]/);
         expect(x.title).not.toMatch(/^(How|What|When|Why|Is|Are|Do|Does|Can|Calculator|Calculators|United States|US |USA|American)/);
         expect(titles.get(x.title)).toBe(1);
       });
       it('description 150-160, year, unique', () => {
         expect(x.description.length, x.description).toBeGreaterThanOrEqual(150);
         expect(x.description.length, x.description).toBeLessThanOrEqual(160);
-        expect(x.description).toMatch(/2026/);
+        expect(x.description).toMatch(/202[67]/);
         expect(descs.get(x.description)).toBe(1);
       });
       it('resume: one paragraph of 120 words or more', () => {

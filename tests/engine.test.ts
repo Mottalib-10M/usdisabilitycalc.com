@@ -74,6 +74,11 @@ describe('long-term care (Rev. Proc. 2025-32 and 2024-40)', () => {
     expect(ltcLimit(40)).toBe(500); expect(ltcLimit(41)).toBe(930); expect(ltcLimit(50)).toBe(930); expect(ltcLimit(60)).toBe(1860);
     expect(ltcLimit(70)).toBe(4960); expect(ltcLimit(71)).toBe(6200);
   });
+  it('2027 limits (Rev. Proc. 2026-35)', () => {
+    expect(ltcLimit(40, 2027)).toBe(500); expect(ltcLimit(41, 2027)).toBe(945); expect(ltcLimit(65, 2027)).toBe(5030); expect(ltcLimit(71, 2027)).toBe(6290);
+    expect(perDiem({ daily: 500, days: 365, costs: 0, reimbursed: 0, year: 2027 }).taxable).toBe((500 - 445) * 365);
+    expect(taxOn(16600 + 12800, 'single', 2027)).toBe(1280);
+  });
   it('2025 limits', () => { expect(ltcLimit(65, 2025)).toBe(4810); expect(ltcLimit(80, 2025)).toBe(6020); expect(ltcLimit(30, 2025)).toBe(480); });
   it('itemizing below the standard deduction saves nothing', () => expect(ltcDeduction({ age: 65, premium: 3000, income: 60000, otherMedical: 0, otherItemized: 0, st: 'single', path: 'itemize', seProfit: 0 }).saved).toBe(0));
   it('self-employed: up to the age limit and the profit', () => {
