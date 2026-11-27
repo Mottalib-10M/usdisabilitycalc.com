@@ -4,8 +4,8 @@
 @font-face { font-family: 'Source Serif 4'; font-style: normal; font-weight: 200 900; font-display: swap; src: url('/fonts/source-serif-4-var.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('/fonts/inter-var.woff2') format('woff2'); }
 @theme {
-  --color-navy-50: #f8fafc; --color-navy-100: #f1f5f9; --color-navy-200: #e2e8f0; --color-navy-300: #cbd5e1; --color-navy-400: #94a3b8; --color-navy-500: #64748b; --color-navy-600: #475569; --color-navy-700: #334155; --color-navy-800: #1e293b; --color-navy-900: #0f172a; --color-navy-950: #020617;
-  --color-accent-50: #eff6fb; --color-accent-100: #dbebf5; --color-accent-200: #b6d7ec; --color-accent-300: #86bcdf; --color-accent-400: #55a1d2; --color-accent-500: #1D4E6E; --color-accent-600: #19425e; --color-accent-700: #14374d; --color-accent-800: #102c3e; --color-accent-900: #0d2230;
+  --color-navy-50: #F8F8F9; --color-navy-100: #EEEFF1; --color-navy-200: #DADDE0; --color-navy-300: #B9BFC6; --color-navy-400: #7E8895; --color-navy-500: #586676; --color-navy-600: #425164; --color-navy-700: #2B3C52; --color-navy-800: #172A41; --color-navy-900: #061A33; --color-navy-950: #020617;
+  --color-accent-50: #FAEFF2; --color-accent-100: #F4DFE5; --color-accent-200: #E8BAC6; --color-accent-300: #D98CA0; --color-accent-400: #CA5E7B; --color-accent-500: #B31942; --color-accent-600: #981538; --color-accent-700: #811230; --color-accent-800: #680E26; --color-accent-900: #0d2230;
   --color-success: #15803d; --color-warning: #b45309; --color-error: #dc2626;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -127,3 +127,69 @@ p[id$="-help"]:not([role="status"]), [data-fixe], [data-actuellement], [aria-liv
 :where(form, div, fieldset):has(> .grid-rows-subgrid) { align-content: start; }
 /* Dans une grille, le cadre du formulaire s'arrête sous ses champs au lieu de s'étirer à la hauteur du résultat. */
 .grid > form:has(> .grid-rows-subgrid) { align-self: start; }
+
+/* === Charte du pays (refonte d'identité validée par l'éditeur, appliquée le 2026-11-25) ===
+   En-tête plein, bandeau héros, simulateur en carte, sections alternées, chiffres-résultats, boutons et pied
+   aux couleurs du pays ; l'échelle --color-accent-* du @theme porte la couleur forte. */
+/* usdisabilitycalc.com : charte v3 (reprise du 2026-11-25) : forte #0A3161, seconde #B31942, sombre #061A33. Rien d'appliqué. */
+header nav[aria-label] { background:#0A3161 !important; border-bottom:4px solid #B31942 !important; }
+header nav[aria-label] > div:first-child > a, header nav[aria-label] > div:first-child > div > a, header nav[aria-label] .nav-dropdown-trigger, #mobile-menu-toggle { color:#fff !important; }
+header nav[aria-label] > div:first-child > a span.text-accent-500 { color:#F3B4C4 !important; }
+header nav[aria-label] .nav-dropdown-trigger:hover, header nav[aria-label] > div:first-child > div > a:hover { background:rgba(255,255,255,.14) !important; }
+header nav[aria-label] > div:first-child a[hreflang], header nav[aria-label] > div:first-child a[lang] { border-color:rgba(255,255,255,.6) !important; }
+header nav[aria-label] img[src^="data:"] { background:#fff; border-radius:8px; padding:2px; }
+.nav-dropdown-panel a, #mobile-menu a, #mobile-menu button { color:#061A33 !important; }
+main > div:first-child { padding-top:0 !important; }
+main > div > header:has(h1), main > div > header:has(h1) ~ :not(section,[data-outil]):has(~ [data-outil]) { box-shadow:0 0 0 100vmax #0A3161; clip-path:inset(0 -100vmax); margin-bottom:0 !important; }
+main > div > header:has(h1) { background:#0A3161; color:#fff; padding:.5rem 0 1.1rem; }
+main > div > header:has(h1) ~ :not(section,[data-outil]):has(~ [data-outil]) { background:#0A3161; margin-top:0 !important; margin-bottom:1rem !important; clip-path:inset(0 -100vmax -1rem) !important; }
+main > div > header:has(h1) ~ :not(section,nav,[data-outil]):has(~ [data-outil]) :is(p,span,a,label,li,time) { color:rgba(255,255,255,.92) !important; }
+main > div > header:has(h1) h1 { color:#fff !important; letter-spacing:-0.02em; }
+main > div > header:has(h1) h1 span { color:#F3B4C4 !important; }
+main > div > header:has(h1) p, main > div > header:has(h1) div, main > div > header:has(h1) a, main > div > header:has(h1) time, main > div > header:has(h1) span:not(h1 span) { color:rgba(255,255,255,.92) !important; }
+main > div > header:has(h1) + nav { background:#0A3161; box-shadow:0 0 0 100vmax #0A3161; clip-path:inset(0 -100vmax); margin:0 !important; padding-bottom:.8rem; }
+main > div > header:has(h1) + nav, main > div > header:has(h1) + nav * { color:#fff !important; }
+main > div > header:has(h1) + nav a[class*="bg-white"] { background:#B31942 !important; border-color:#B31942 !important; color:#FFFFFF !important; }
+main > div > header:has(h1) + nav a[class*="bg-white"] * { color:#FFFFFF !important; }
+main > div > header:has(h1) + nav a[class*="bg-white"]:hover { background:#981538 !important; }
+main [data-outil] , main > div > header:has(h1) + :not(nav,style,script,p,.clamp,[class*="amber"],[class*="border-l"]) , main > div > header:has(h1) + nav + * , main > div > header:has(h1) ~ astro-island:first-of-type > *:first-child { border-image:linear-gradient(#0A3161 0 5.5rem, transparent 5.5rem) fill 0//0 100vmax; }
+main [data-outil] > astro-island > :first-child, main [data-outil] > div:not([class*="amber"]):first-of-type, main > div > header:has(h1) ~ astro-island:first-of-type > :first-child > :first-child { background:#fff; border-top:6px solid #B31942 !important; border-radius:14px;  }
+main > div > section:nth-of-type(even), main > div > div.prose:nth-of-type(odd) { border-image:conic-gradient(#E6EBF2 0 0) fill 0//0 100vmax; padding-block:1.75rem; }
+main section h2, main .prose h2{color:#061A33!important;text-decoration:underline;text-decoration-color:#B31942;text-decoration-thickness:5px;text-underline-offset:9px;text-decoration-skip-ink:none}
+main .bg-accent-50 { background:#F9EDF0 !important; border-left:6px solid #B31942; }
+main [class*="tabular-nums"][class*="text-2xl"], main [class*="tabular-nums"][class*="text-3xl"], main [class*="tabular-nums"][class*="text-4xl"], main dd[class*="text-2xl"], main dd[class*="text-xl"], main [data-outil] [class*="text-3xl"], main [data-outil] [class*="text-4xl"] { font-size:2.25rem !important; line-height:1.1; color:#B31942 !important; }
+main a[class*="border-accent"], main a[class*="bg-accent-5"], main a[class*="bg-accent-6"], main button:is([class*="bg-accent-5"],[class*="bg-accent-6"],[class*="bg-accent-7"]):not([class*="bg-accent-50"]):not(.fixed), main button[type="submit"] { background:#B31942 !important; color:#FFFFFF !important; border-color:#B31942 !important; border-radius:10px; }
+main a[class*="border-accent"]:hover, main button:is([class*="bg-accent-5"],[class*="bg-accent-6"],[class*="bg-accent-7"]):not([class*="bg-accent-50"]):not(.fixed):hover { background:#981538 !important; }
+main a[class*="border-accent"] * { color:#FFFFFF !important; }
+main p a, main li > a:not([class*="rounded"]), main .prose a { color:#B31942 !important; text-decoration:underline; }
+main table thead th { color:#061A33; border-bottom-color:transparent !important; box-shadow:inset 0 -3px 0 #B31942; }
+body > footer, footer.mt-16 { background:#061A33 !important; border-top:5px solid #B31942 !important; }
+body > footer *, footer.mt-16 * { color:#F1F5F9 !important; border-color:rgba(255,255,255,.18) !important; }
+body > footer a, footer.mt-16 a { color:#F3B4C4 !important; }
+/* sites sans data-outil : simulateur directement dans un astro-island (carte .rechner) ou dans une section/div enveloppe */
+main > div > header:has(h1):has(~ astro-island:first-of-type > .rechner.rechner) { padding-bottom:4.5rem; }
+main > div > header:has(h1) ~ astro-island:first-of-type > .rechner.rechner { border-image:none !important; position:relative; margin-top:-3.25rem; background:#fff !important; border:1px solid #D2D6DA !important; border-top:6px solid #B31942 !important; border-radius:14px;  }
+main > div > header:has(h1) ~ astro-island:first-of-type > .rechner.rechner > :first-child { background:transparent !important; border-top:0 !important; box-shadow:none !important; border-radius:0; }
+main > div > header:has(h1) [class*="bg-white"], main > div > header:has(h1) [class*="bg-white"] * { color:#061A33 !important; }
+main > div > header:has(h1) + :is(section,div):not([data-outil]) > astro-island > :first-child { background:#fff; border-top:6px solid #B31942 !important; border-radius:14px;  }
+
+/* corrections v3 */
+footer .rounded-full, footer [class*="bg-"] { background:transparent !important; border-color:rgba(255,255,255,.35) !important; }
+main button[aria-pressed="true"]:not(#z) { background:#B31942 !important; color:#FFFFFF !important; }
+main button[aria-pressed="false"]:not(#z) { background:#fff !important; color:#061A33 !important; }
+.skip-link:not(#z) { background:#061A33 !important; color:#fff !important; }
+body button.fixed:not(#z), body button.fixed:not(#z) * { background:#F9EDF0 !important; color:#061A33 !important; }
+body button.fixed:not(#z) { border:0 !important; border-top:4px solid #B31942 !important; }
+main > div > header:has(h1) ~ :not(section,nav,[data-outil]):has(~ [data-outil]):is(p,div,time) { color:#fff !important; }
+main :is(p,li,td,caption) a:not([class*="rounded"]):not(#z) { text-decoration-thickness:auto !important; text-underline-offset:auto !important; }
+main :is(p,li,td,caption,span) > a:not([class*="rounded"]):not([class*="block"]):not([class*="flex"]) { padding-block:3px; }
+main > div > header:has(h1) + :is(section,div):not(nav,style,script,p,.clamp,[class*="amber"],[class*="border-l"]) > h2:first-child:not(#z) { color:#fff !important; text-decoration-color:#B31942; }
+main > div > header:has(h1) label:not(#z) { color:#fff !important; }
+header nav[aria-label] a span[class*="text-accent"]:not(#z) { color:#F3B4C4 !important; }
+.skip-link:not(:focus) { opacity:0; }
+body :is(a,div,button,aside)[class*="fixed"][class*="bottom-"]:not(nav):not(#z), body :is(a,div,button,aside)[class*="fixed"][class*="bottom-"]:not(nav):not(#z) * { background:#F9EDF0 !important; color:#061A33 !important; }
+/* fil d'Ariane posé sur le bandeau (pas de bande blanche au-dessus) */
+main > div:has(> header > h1) { padding-top:0 !important; }
+main > div:first-child:not(:has(> header > h1)):has(~ div > header > h1) { background:#0A3161 !important; box-shadow:0 0 0 100vmax #0A3161; clip-path:inset(0 -100vmax); margin-top:0 !important; margin-bottom:0 !important; padding-top:10px !important; padding-bottom:2px !important; }
+main > div:first-child:not(:has(> header > h1)):has(~ div > header > h1) * { color:#fff !important; }
+/* === fin de la charte du pays === */
